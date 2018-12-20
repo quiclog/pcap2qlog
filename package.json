@@ -3,10 +3,13 @@
   "version": "1.0.0",
   "description": "Parse a pcap(ng) file to qlog.",
   "main": "index.js",
-  "dependencies": {},
+  "dependencies": {
+    "minimist": "^1.2.0"
+  },
   "devDependencies": {
+    "typescript": "^3.2.2",
     "@types/node": "^10.12.14",
-    "typescript": "^3.2.2"
+    "@types/minimist": "^1.2.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
