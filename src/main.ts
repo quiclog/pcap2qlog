@@ -1,5 +1,6 @@
 import {ParserPCAP} from "./parsers/network/ParserPCAP";
-import {IEventNewConnection, IQLog, IQLogEvent, VantagePoint} from "./spec/Draft-16/QLog";
+import {IEventData, IEventNewConnection, IQLog, VantagePoint} from "./spec/Draft-16/QLog";
+import {QUIC} from "./spec/Draft-16/QUIC";
 
 let fs = require('fs');
 
@@ -43,7 +44,65 @@ if (input_file_extension === "json") {
         pcapParser.getConnectionInfo() as IEventNewConnection
     ]);
 
-    // TODO rest of packets maybe, no? yes!
+    //TODO keys
+
+    for (let x of jsonTrace) {
+        let frame = x['_source']['layers']['frame'];
+        let quic = x['_source']['layers']['quic'];
+
+        let time = parseFloat(frame['frame.time_epoch']);
+        let time_relative: number = Math.round((time - myQLog.starttime) * 1000);
+
+        let header: any = {};
+
+        if (quic['quic.header_form'] === '1') // LONG header
+        {
+            header.form = 'long';
+            header.type = QUIC.getPacketType(quic['quic.long.packet_type']);
+            header.version = quic['quic.version'];
+            header.scid = quic['quic.scid'].replace(/:/g, '');
+            header.dcid = quic['quic.dcid'].replace(/:/g, '');
+            header.scil = quic['quic.scil'].replace(/:/g, '');
+            header.dcil = quic['quic.dcil'].replace(/:/g, '');
+            header.payload_length = quic['quic.length'];
+            header.packet_number = quic['quic.packet_number_full'];
+        }
+        else {
+            header.form = 'short';
+            header.dcid = quic['quic.dcid'].replace(/:/g, '');
+            header.payload_length = "TODO";
+            header.packet_number = quic['quic.packet_number_full'];
+        }
+
+        let entry: any = {
+            raw_encrypted: "TODO",
+            header: header,
+        };
+
+        console.log("--------------------");
+
+
+        let keys = Object.keys(quic['quic.frame']);
+        let tmp: any = {};
+        for (var j = 0; j < keys.length; j++) {
+            var key = keys[j].replace(/^quic\./, "");
+            tmp[key] = quic['quic.frame'][keys[j]];
+        }
+
+
+        tmp['frame_type'] = QUIC.getFrameTypeName(tmp['frame_type']);
+
+        entry.frames = [];
+        entry.frames.push(tmp);
+
+        myQLog.events.push([
+            time_relative,
+            "TRANSPORT",
+            "PACKET_RX",
+            "LINE",
+            entry
+        ]);
+    }
 
 
     //TODO write to file

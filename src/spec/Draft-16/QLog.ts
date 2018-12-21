@@ -11,7 +11,7 @@ export interface IQLog {
     connectionid: string,
     starttime: number,
     fields: string[],
-    events: any[][]
+    events: [number, string, string, string, IEventData][]
 }
 
 
@@ -29,14 +29,6 @@ export enum SSLSecrets {
     QUIC_SERVER_TRAFFIC_SECRET = "QUIC_SERVER_TRAFFIC_SECRET",
     QUIC_CLIENT_TRAFFIC_SECRET = "QUIC_CLIENT_TRAFFIC_SECRET",
     ADDITIONAL_SECRET = "ADDITIONAL_SECRET"
-}
-
-export interface IQLogEvent {
-    time: number,
-    category: string,
-    type: string,
-    trigger: string
-    data: IEventData
 }
 
 // ================================================================== //
@@ -59,7 +51,7 @@ export interface IEventNewConnection extends IEventData {
 // ================================================================== //
 
 export interface IEventKeyUpdate extends IEventData {
-    type: SSLSecrets,
+    name: SSLSecrets,
     key: string
 }
 
