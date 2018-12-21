@@ -29,6 +29,20 @@ export class ParserPCAP {
         let layer_ip = this.jsonTrace[0]['_source']['layers']['ip'];
         let layer_udp = this.jsonTrace[0]['_source']['layers']['udp'];
 
+        if(!layer_ip) {
+            layer_ip = this.jsonTrace[0]['_source']['layers']['ipv6'];
+            return {
+                ip_version: layer_ip['ipv6.version'],
+                srcip: layer_ip['ipv6.src'],
+                dstip: layer_ip['ipv6.dst'],
+                srcport: layer_udp['udp.srcport'],
+                dstport: layer_udp['udp.dstport'],
+            }
+        }
+
+
+
+
         return {
             ip_version: layer_ip['ip.version'],
             srcip: layer_ip['ip.src'],

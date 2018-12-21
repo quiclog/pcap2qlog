@@ -15,6 +15,7 @@ let output_file: string = args.o;
 // Determine file extension
 let input_file_extension: string = input_file.substr(input_file.lastIndexOf('.') + 1);
 
+
 if (input_file_extension === "json") {
     // JSON flow
 
@@ -79,9 +80,6 @@ if (input_file_extension === "json") {
             header: header,
         };
 
-        console.log("--------------------");
-
-
         let keys = Object.keys(quic['quic.frame']);
         let tmp: any = {};
         for (var j = 0; j < keys.length; j++) {
@@ -107,6 +105,8 @@ if (input_file_extension === "json") {
 
     //TODO write to file
     console.log(JSON.stringify(myQLog, null, 4));
+
+    fs.writeFileSync("20181219_handshake_v6_quicker.edm.uhasselt.be.qlog",JSON.stringify(myQLog, null, 4));
 }
 else if (input_file_extension === "pcap" || input_file_extension === "pcapng") {
     // PCAP(NG) flow
