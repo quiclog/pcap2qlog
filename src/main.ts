@@ -1,5 +1,16 @@
 import {ParserPCAP} from "./parsers/network/ParserPCAP";
-import {IEventData, IEventNewConnection, IQLog, VantagePoint} from "./spec/Draft-16/QLog";
+import {
+    ConnectivityEventTrigger,
+    ConnectivityEventType,
+    EventCategory,
+    IEventNewConnection,
+    IEventPacketRX,
+    IEventPacketRXHeader,
+    IQLog,
+    TransporEventTrigger,
+    TransportEventType,
+    VantagePoint
+} from "./spec/Draft-16/QLog";
 import {QUIC} from "./spec/Draft-16/QUIC";
 
 let fs = require('fs');
@@ -39,9 +50,9 @@ if (input_file_extension === "json") {
     // First event = new connection
     myQLog.events.push([
         0,
-        "CONNECTIVITY",
-        "NEW CONNECTION",
-        "LINE",
+        EventCategory.CONNECTIVITY,
+        ConnectivityEventType.NEW_CONNECTION,
+        ConnectivityEventTrigger.LINE,
         pcapParser.getConnectionInfo() as IEventNewConnection
     ]);
 
@@ -54,9 +65,9 @@ if (input_file_extension === "json") {
         let time = parseFloat(frame['frame.time_epoch']);
         let time_relative: number = Math.round((time - myQLog.starttime) * 1000);
 
-        let header: any = {};
+        let header = {} as IEventPacketRXHeader;
 
-        if (quic['quic.header_form'] === '1') // LONG header
+        if (quic['quic.header_form'] == '1') // LONG header
         {
             header.form = 'long';
             header.type = QUIC.getPacketType(quic['quic.long.packet_type']);
@@ -71,7 +82,7 @@ if (input_file_extension === "json") {
         else {
             header.form = 'short';
             header.dcid = quic['quic.dcid'].replace(/:/g, '');
-            header.payload_length = "TODO";
+            header.payload_length = 0; // TODO!
             header.packet_number = quic['quic.packet_number_full'];
         }
 
@@ -93,11 +104,14 @@ if (input_file_extension === "json") {
         entry.frames = [];
         entry.frames.push(tmp);
 
+        x = [] as IEventPacketRX;
+
+
         myQLog.events.push([
             time_relative,
-            "TRANSPORT",
-            "PACKET_RX",
-            "LINE",
+            EventCategory.TRANSPORT,
+            TransportEventType.TRANSPORT_PACKET_RX,
+            TransporEventTrigger.LINE,
             entry
         ]);
     }
@@ -106,7 +120,7 @@ if (input_file_extension === "json") {
     //TODO write to file
     console.log(JSON.stringify(myQLog, null, 4));
 
-    fs.writeFileSync("20181219_handshake_v6_quicker.edm.uhasselt.be.qlog",JSON.stringify(myQLog, null, 4));
+    fs.writeFileSync("20181219_handshake_v6_quicker.edm.uhasselt.be.qlog", JSON.stringify(myQLog, null, 4));
 }
 else if (input_file_extension === "pcap" || input_file_extension === "pcapng") {
     // PCAP(NG) flow

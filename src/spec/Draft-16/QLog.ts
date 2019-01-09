@@ -11,7 +11,46 @@ export interface IQLog {
     connectionid: string,
     starttime: number,
     fields: string[],
-    events: [number, string, string, string, IEventData][]
+    //TODO
+    events: [
+        number,
+        EventCategory,
+        ConnectivityEventType | TransportEventType | SecurityEventType,
+        ConnectivityEventTrigger | TransporEventTrigger | SecurityEventTrigger,
+        IEventData
+        ][]
+}
+
+// ================================================================== //
+
+export enum EventCategory {
+    CONNECTIVITY = "CONNECTIVITY",
+    SECURITY = "SECURITY",
+    TRANSPORT = "TRANSPORT",
+}
+
+export enum ConnectivityEventType {
+    NEW_CONNECTION = "NEW_CONNECTION",
+}
+
+export enum ConnectivityEventTrigger {
+    LINE = "LINE"
+}
+
+export enum TransportEventType {
+    TRANSPORT_PACKET_RX = "PACKET_RX",
+}
+
+export enum TransporEventTrigger {
+    LINE = "LINE"
+}
+
+export enum SecurityEventType {
+    KEY_UPDATE = "KEY_UPDATE"
+}
+
+export enum SecurityEventTrigger {
+    KEYLOG = "KEYLOG",
 }
 
 
@@ -72,7 +111,7 @@ export interface IEventPacketRXHeader {
     scid: string,
     dcid: string,
     payload_length: number,
-    packet_numer: string
+    packet_number: string
 }
 
 export interface IEventPacketRXFrame {
