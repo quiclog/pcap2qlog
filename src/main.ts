@@ -1,17 +1,7 @@
+
 import {ParserPCAP} from "./parsers/network/ParserPCAP";
-import {
-    ConnectivityEventTrigger,
-    ConnectivityEventType,
-    EventCategory,
-    IEventNewConnection,
-    IEventPacketRX,
-    IEventPacketRXHeader,
-    IQLog,
-    TransporEventTrigger,
-    TransportEventType,
-    VantagePoint
-} from "./spec/Draft-16/QLog";
-import {QUIC} from "./spec/Draft-16/QUIC";
+import * as qlog from "@quictools/qlog-schema";
+import {PCAPUtil} from "./spec/Draft-16/PCAPUtil";
 
 let fs = require('fs');
 
@@ -35,12 +25,10 @@ if (input_file_extension === "json") {
     // I don't like this. Should make better
     let pcapParser: ParserPCAP = new ParserPCAP(jsonTrace);
 
-
-    let myQLog: IQLog;
-    myQLog = {
+    let myQLogConnection: qlog.IConnection;
+    myQLogConnection = {
         quic_version: pcapParser.getQUICVersion(),
-        qlog_version: "0.1",
-        vantagepoint: VantagePoint.NETWORK,
+        vantagepoint: qlog.VantagePoint.NETWORK,
         connectionid: pcapParser.getConnectionID(),
         starttime: pcapParser.getStartTime(),
         fields: ["time", "category", "type", "trigger", "data"],
@@ -48,12 +36,12 @@ if (input_file_extension === "json") {
     };
 
     // First event = new connection
-    myQLog.events.push([
+    myQLogConnection.events.push([
         0,
-        EventCategory.CONNECTIVITY,
-        ConnectivityEventType.NEW_CONNECTION,
-        ConnectivityEventTrigger.LINE,
-        pcapParser.getConnectionInfo() as IEventNewConnection
+        qlog.EventCategory.CONNECTIVITY,
+        qlog.ConnectivityEventType.NEW_CONNECTION,
+        qlog.ConnectivityEventTrigger.LINE,
+        pcapParser.getConnectionInfo() as qlog.IEventNewConnection
     ]);
 
     //TODO keys
@@ -63,14 +51,14 @@ if (input_file_extension === "json") {
         let quic = x['_source']['layers']['quic'];
 
         let time = parseFloat(frame['frame.time_epoch']);
-        let time_relative: number = Math.round((time - myQLog.starttime) * 1000);
+        let time_relative: number = Math.round((time - myQLogConnection.starttime) * 1000);
 
-        let header = {} as IEventPacketRXHeader;
+        let header = {} as qlog.IPacketHeader;
 
         if (quic['quic.header_form'] == '1') // LONG header
         {
             header.form = 'long';
-            header.type = QUIC.getPacketType(quic['quic.long.packet_type']);
+            header.type = PCAPUtil.getPacketType(quic['quic.long.packet_type']);
             header.version = quic['quic.version'];
             header.scid = quic['quic.scid'].replace(/:/g, '');
             header.dcid = quic['quic.dcid'].replace(/:/g, '');
@@ -99,23 +87,29 @@ if (input_file_extension === "json") {
         }
 
 
-        tmp['frame_type'] = QUIC.getFrameTypeName(tmp['frame_type']);
+        tmp['frame_type'] = PCAPUtil.getFrameTypeName(tmp['frame_type']);
 
         entry.frames = [];
         entry.frames.push(tmp);
 
-        x = [] as IEventPacketRX;
+        x = [] as qlog.IEventPacketRX;
 
 
-        myQLog.events.push([
+        myQLogConnection.events.push([
             time_relative,
-            EventCategory.TRANSPORT,
-            TransportEventType.TRANSPORT_PACKET_RX,
-            TransporEventTrigger.LINE,
+            qlog.EventCategory.TRANSPORT,
+            qlog.TransportEventType.TRANSPORT_PACKET_RX,
+            qlog.TransporEventTrigger.LINE,
             entry
         ]);
     }
 
+    let myQLog: qlog.IQLog;
+    myQLog = {
+        qlog_version: "0.1",
+        description: input_file,
+        connections: [myQLogConnection]
+    };
 
     //TODO write to file
     console.log(JSON.stringify(myQLog, null, 4));
