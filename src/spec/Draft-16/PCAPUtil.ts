@@ -1,5 +1,5 @@
 
-import * as qlog from "@quictools/qlog-schema/draft-16/QLog";
+import * as qlog from "@quictools/qlog-schema/dist/draft-16/QLog";
 
 export class PCAPUtil {
 
