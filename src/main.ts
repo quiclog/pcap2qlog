@@ -1,4 +1,3 @@
-
 import {ParserPCAP} from "./parsers/network/ParserPCAP";
 import * as qlog from "@quictools/qlog-schema";
 import {PCAPUtil} from "./spec/Draft-16/PCAPUtil";
