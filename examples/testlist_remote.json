@@ -1,0 +1,18 @@
+{
+	"paths": [
+		{ "capture": "https://quic-tracker.info.ucl.ac.be/traces/20190123/65/pcap?.pcap",
+		  "secrets": "https://quic-tracker.info.ucl.ac.be/traces/20190123/65/secrets?.keys" },
+		{ "capture": "https://quic-tracker.info.ucl.ac.be/traces/20190123/61/pcap?.pcap",
+		  "secrets": "https://quic-tracker.info.ucl.ac.be/traces/20190123/61/secrets?.keys" },
+		{ "capture": "https://quic-tracker.info.ucl.ac.be/traces/20190123/76/pcap?.pcap",
+		  "secrets": "https://quic-tracker.info.ucl.ac.be/traces/20190123/76/secrets?.keys" },
+		{ "capture": "https://quic-tracker.info.ucl.ac.be/traces/20190123/97/pcap?.pcap",
+		  "secrets": "https://quic-tracker.info.ucl.ac.be/traces/20190123/97/secrets?.keys" },
+		{ "capture": "https://quic-tracker.info.ucl.ac.be/traces/20190123/139/pcap?.pcap",
+		  "secrets": "https://quic-tracker.info.ucl.ac.be/traces/20190123/139/secrets?.keys" },
+		{ "capture": "https://quic-tracker.info.ucl.ac.be/traces/20190123/139/pcap",
+		  "secrets": "https://quic-tracker.info.ucl.ac.be/traces/20190123/139/secrets" },
+		{ "capture": "https://does-not-exist.pcap",
+		  "secrets": "https://cannot-be-found.keys" }
+	]
+}
