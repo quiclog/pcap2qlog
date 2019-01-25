@@ -34,8 +34,8 @@ export class PCAPToJSON{
             if( secretsPath )
                 option = `-o tls.keylog_file:${secretsPath}`;
 
-            exec( `echo ${pcapPath} > ${outputPath}`, function(error, {}, stderr){
-            //exec( tsharkLocation + ` --no-duplicate-keys -r ${pcapPath} -T json ${option} > ${outputPath}`, function(error, {}, stderr){
+            //exec( `echo ${pcapPath} > ${outputPath}`, function(error, {}, stderr){
+            exec( tsharkLocation + ` --no-duplicate-keys -r ${pcapPath} -T json ${option} > ${outputPath}`, function(error, {}, stderr){
                 if( timeoutHappened )
                     return;
 

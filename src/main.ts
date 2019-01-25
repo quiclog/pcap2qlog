@@ -1,13 +1,15 @@
-import {ParserPCAP} from "./parsers/network/ParserPCAP";
-import * as qlog from "@quictools/qlog-schema";
-import {PCAPUtil} from "./spec/Draft-16/PCAPUtil";
-
 import * as fs from "fs";
 import * as path from "path";
+import {promisify} from "util";
+
+const readFileAsync = promisify(fs.readFile);
+const writeFileAsync = promisify(fs.writeFile);
 
 import {Downloader} from "./flow/downloader";
-import { mkDirByPathSync } from "./util/FileUtil";
+import { mkDirByPathSync, createHash } from "./util/FileUtil";
 import {PCAPToJSON} from "./flow/pcaptojson";
+import {JSONToQLog} from "./flow/jsontoqlog";
+import * as qlog from "@quictools/qlog-schema";
 
 // Parse CLI arguments
 let args = require('minimist')(process.argv.slice(2));
@@ -16,8 +18,9 @@ let args = require('minimist')(process.argv.slice(2));
 // we expect the input file to be EITHER a JSON file of the format:
 /*
     {
+        "description": "top-level description",
         "paths": [
-            { "capture": "https://...", "secrets": "https://..." }
+            { "capture": "https://...", "secrets": "https://...", "description" : "per-file desc" }
         ]
     }
 */
@@ -30,6 +33,8 @@ let args = require('minimist')(process.argv.slice(2));
 // node main.js --input=/decrypted.json  --output=/srv/qvis-cache
 // OR
 // node main.js --input=/encrypted.pcap --secrets=/secrets.keys  --output=/srv/qvis-cache
+// NOTE: this tool can also be used to merge together multiple (partial) qlog files
+//  for this, just pass the files with the --list option
 let input_list: string           = args.l || args.list;
 let input_file: string           = args.i || args.input;
 let secrets_file: string         = args.s || args.secrets;
@@ -45,26 +50,30 @@ async function Flow() {
     let inputIsList:boolean = input_list !== undefined;
 
     // each session gets their own temporary input directory so we can easily remove it from disk after everything is done 
-    let inputDirectory = path.resolve( output_directory + path.sep + "inputs" );
-    inputDirectory += path.sep + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-    mkDirByPathSync( inputDirectory );
+    let tempDirectory = path.resolve( output_directory + path.sep + "inputs" );
+    tempDirectory += path.sep + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    mkDirByPathSync( tempDirectory );
 
     // 1. make single input format
     // we have 3 options:
-    // a. it's a custom json file with many different input files (either .json or .pcap/pcapng) and possibly keys
+    // a. it's a custom json file with many different input files (either .qlog, .json or .pcap/pcapng) and possibly keys
     // b. it's just a single decrypted json file (tshark output)
     // c. it's just a single pcap or pcapng file and possibly a single key file
     // -> we rework b. and c. to the format of a. for easier manipulation later
 
     interface ICapture {
+        qlog?:qlog.IQLog;
         capture_original:string; // for proper debugging
         capture:string;
         secrets_original?:string; // for proper debugging
         secrets?:string;
         error?:string;
+        description?:string;
     }
 
     let inputList:Array<ICapture> = [];
+    let inputListDescription:string = "";
+    let inputListRawString:string = "";
 
     if( !inputIsList ){
         if( input_file.indexOf(".json") >= 0 ){ // tshark json file
@@ -78,13 +87,32 @@ async function Flow() {
         }
     }
     else{
-        let listLocalFilePath:string = await Downloader.DownloadIfRemote( input_list, inputDirectory );
-        inputList = JSON.parse( fs.readFileSync( listLocalFilePath ).toString() ).paths;
+        let listLocalFilePath:string = await Downloader.DownloadIfRemote( input_list, tempDirectory );
+        inputListRawString = fs.readFileSync( listLocalFilePath ).toString();
+        let inputListJSON:any = JSON.parse( inputListRawString );
+
+        inputListDescription = inputListJSON.description ? inputListJSON.description : input_file; // default description is the file path itself
+        inputList = inputListJSON.paths;
         for( let capt of inputList ){
             capt.capture_original = capt.capture;
             capt.secrets_original = capt.secrets_original;
         }
     }
+
+    // TODO: first check cache to see if we haven't already done this process for this file or file-list before
+    let calculateStableHash = function():string {
+        let output:string = "";
+        if( inputIsList ){
+            // we're not just using the filename, because this is more flexible, especially if the contents are made on-the-fly
+            output = createHash( inputListRawString );
+        }
+        else{
+            output = createHash( input_file + secrets_file );
+        }
+
+        return output;
+    }
+
 
     // 2. now we have a nice list of files (possibly with secrets) that we would like to download
     // These files can either be local or remote, so we should always download them first if needed
@@ -106,14 +134,14 @@ async function Flow() {
             // we can't just throw errors, because that would fail the full Promise.all, 
             // while we just want to skip the files that don't work and show an error message
             try{
-                capt.capture = await Downloader.DownloadIfRemote( capt.capture, inputDirectory );
+                capt.capture = await Downloader.DownloadIfRemote( capt.capture, tempDirectory );
             }
             catch(e){
                 capt.error = e;
             }
             if( capt.secrets ){
                 try{
-                    capt.secrets = await Downloader.DownloadIfRemote( capt.secrets, inputDirectory );
+                    capt.secrets = await Downloader.DownloadIfRemote( capt.secrets, tempDirectory );
                 }
                 catch(e){
                     capt.error = e;
@@ -128,7 +156,7 @@ async function Flow() {
     // performance should be relatively ok, unless there is a single file that is MUCH bigger than the rest of course
     let downloadPromises = []; 
     for( let capture of inputList ){
-        downloadPromises.push( download(capture, inputDirectory) );
+        downloadPromises.push( download(capture, tempDirectory) );
     }
 
     let downloadedFiles = await Promise.all( downloadPromises );
@@ -146,22 +174,119 @@ async function Flow() {
         // TODO: we explicitly do NOT check for .pcap or .pcapng here to allow for most flexibility
         // this may come back to bite us in the *ss later
         
-        capt.capture = await PCAPToJSON.TransformToJSON( capt.capture, inputDirectory, capt.secrets );
-
+        try{
+            capt.capture = await PCAPToJSON.TransformToJSON( capt.capture, tempDirectory, capt.secrets );
+        }
+        catch(e){
+            capt.error = e;
+        }
+        
         return capt;
     };
 
     let tsharkPromises = []; 
     for( let capture of downloadedFiles ){
-        tsharkPromises.push( tshark(capture, inputDirectory) );
+        tsharkPromises.push( tshark(capture, tempDirectory) );
     }
 
     let tsharkFiles = await Promise.all( tsharkPromises );
 
 
+    // 3. so now everything should be in either .json or .qlog format
+    // we now want to transform tshark's .json schema into our .qlog schema
+    let transform = async function(capt:ICapture, outputDirectory:string):Promise<ICapture>{
+        if( capt.error )
+            return capt;
+
+        if( path.extname(capt.capture) == ".qlog" ){
+            // we already had a qlog file from the beginning
+            // just read it and use it directly
+            let fileContents:Buffer = await readFileAsync( capt.capture );
+            capt.qlog = JSON.parse(fileContents.toString());
+            return capt;
+        }
+
+        try{
+            // we don't write to file here, but pass the qlog object around directly to write a combined file later
+            capt.qlog = await JSONToQLog.TransformToQLog( capt.capture, tempDirectory, capt.secrets );
+        }
+        catch(e){
+            capt.error = e;
+        }
+        
+        return capt;
+    }
+
+    let transformPromises = []; 
+    for( let capture of tsharkFiles ){
+        transformPromises.push( transform(capture, tempDirectory) );
+    }
+
+    let transformFiles = await Promise.all( transformPromises );
+
+
+    // 4. now, we finally have all the qlog files
+    // If there are indeed multiple, we want to combine those into a single big qlog file
+
+    // the capt.qlog data structures are FULL qlogs, so we need to extract the separate connections
+    // to make a new FULL qlog that combines all of them 
+
+    let combined:qlog.IQLog = {
+        qlog_version: "0.1",
+        description: inputListDescription,
+        connections: []
+    };
+
+    for( let capt of transformFiles ){
+        if( capt.qlog ){
+            // valid qlog found
+            if( !capt.description )
+                capt.description = capt.capture_original; // use the filename as the description
+
+            // we basically just throw away all the top-level qlog stuff 
+            // and transfer over all connection-specific information to the combined file
+            for( let connection of capt.qlog.connections ){
+                connection.metadata = capt.description;
+                combined.connections.push( connection );
+            }
+        }
+        else if( capt.error ){
+            // we want to reflect the errors in the resulting qlog file instead of just returning nothing
+            // so we pretend we have a connection, but just set the metadata to the error
+            let connection:qlog.IConnection = {
+                quic_version: "unknown",
+                vantagepoint: qlog.VantagePoint.NETWORK,
+                connectionid: "unknown",
+                starttime: 0,
+                fields: [],
+                events: [],
+
+                metadata: capt.error
+            };
+
+            combined.connections.push( connection );
+        }
+        else{
+            console.error("main:combining : something went wrong. we have a capture we cannot process.", capt);
+        }
+    }
+
+    // 5. we now have a single, combined IQLog file
+    // we want to save this to disk so we can later use that as a cache
+    // we need the filename to be stable, so we hash either the file+secrets paths OR the contents of the json list file
+    let outputFilename:string = calculateStableHash() + ".qlog";
+    
+    let outputDirectory = path.resolve( output_directory + path.sep + "cache" );
+    mkDirByPathSync( outputDirectory );
+
+    await writeFileAsync( outputDirectory + path.sep + outputFilename, JSON.stringify(combined, null, 4) );
+
     console.log("Input list : ", inputList);
     console.log("Downloaded files : ", downloadedFiles);
-    console.log("Transformed files : ", tsharkFiles);
+    console.log("Tsharked files : ", tsharkFiles);
+    console.log("Transformed files : ", transformFiles);
+
+    console.log("Combined output path : ", outputDirectory + path.sep + outputFilename );
 
     process.exit(0);
 };

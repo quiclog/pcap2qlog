@@ -1,6 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
+const crypto = require("crypto");
+
 // https://stackoverflow.com/questions/31645738/how-to-create-full-path-with-nodes-fs-mkdirsync
 export function mkDirByPathSync(targetDir:string, {isRelativeToScript = false} = {}) {
   const sep = path.sep;
@@ -24,4 +26,8 @@ export function mkDirByPathSync(targetDir:string, {isRelativeToScript = false} =
     return curDir;
   }, initDir);
 
+}
+
+export function createHash(contents:string){
+    return crypto.createHash('sha1').update( contents ).digest('hex');
 }
