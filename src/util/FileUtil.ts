@@ -13,7 +13,7 @@ export function mkDirByPathSync(targetDir:string, {isRelativeToScript = false} =
     const curDir = path.resolve(baseDir, parentDir, childDir);
     try {
       fs.mkdirSync(curDir);
-      console.log(`Directory ${curDir} created!`);
+      //console.log(`Directory ${curDir} created!`);
     } catch (err) {
       if (err.code !== 'EEXIST' && 
           !(err.code == 'EPERM' && curDir == "C:\\") ) {

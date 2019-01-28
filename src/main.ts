@@ -38,10 +38,16 @@ let args = require('minimist')(process.argv.slice(2));
 let input_list: string           = args.l || args.list;
 let input_file: string           = args.i || args.input;
 let secrets_file: string         = args.s || args.secrets;
-let output_directory: string     = args.o || args.output    || "/srv/qvis-cache";
+let output_directory: string     = args.o || args.output    || "/srv/qvis-cache"; // output will be placed in args.o/cache/generatedfilename.json  and temp storage is  args.o/inputs/
+let output_path: string          = args.p || args.outputpath;   // output will be placed in args.p  and temp storage is  args.o/inputs/
 
 if( !input_file && !input_list ){
     console.error("No input file or list of files specified, use --input or --list");
+    process.exit(1);
+}
+
+if( !output_directory ){
+    console.error("Please specify an output_directory, even if you have specified an output_path (needed for temp file storage)");
     process.exit(1);
 }
 
@@ -240,13 +246,13 @@ async function Flow() {
     for( let capt of transformFiles ){
         if( capt.qlog ){
             // valid qlog found
-            if( !capt.description )
-                capt.description = capt.capture_original; // use the filename as the description
+            //if( !capt.description )
+            //    capt.description = capt.capture_original; // use the filename as the description
 
             // we basically just throw away all the top-level qlog stuff 
             // and transfer over all connection-specific information to the combined file
             for( let connection of capt.qlog.connections ){
-                connection.metadata = capt.description;
+                connection.metadata = { description: capt.description, filename: capt.capture_original };
                 combined.connections.push( connection );
             }
         }
@@ -261,7 +267,7 @@ async function Flow() {
                 fields: [],
                 events: [],
 
-                metadata: capt.error
+                metadata: { description: ("" + capt.error), filename: capt.capture_original }
             };
 
             combined.connections.push( connection );
@@ -274,27 +280,37 @@ async function Flow() {
     // 5. we now have a single, combined IQLog file
     // we want to save this to disk so we can later use that as a cache
     // we need the filename to be stable, so we hash either the file+secrets paths OR the contents of the json list file
-    let outputFilename:string = calculateStableHash() + ".qlog";
-    
-    let outputDirectory = path.resolve( output_directory + path.sep + "cache" );
-    mkDirByPathSync( outputDirectory );
+    let outputPath:string = output_path;
+    if( !outputPath ){
+        let outputFilename:string = calculateStableHash() + ".qlog";
+        
+        let outputDirectory = path.resolve( output_directory + path.sep + "cache" );
+        mkDirByPathSync( outputDirectory );
 
-    await writeFileAsync( outputDirectory + path.sep + outputFilename, JSON.stringify(combined, null, 4) );
+        outputPath = outputDirectory + path.sep + outputFilename;
+    }
 
+    await writeFileAsync( outputPath, JSON.stringify(combined, null, 4) );
+
+    console.log( outputPath );
+
+    /*
     console.log("Input list : ", inputList);
     console.log("Downloaded files : ", downloadedFiles);
     console.log("Tsharked files : ", tsharkFiles);
     console.log("Transformed files : ", transformFiles);
 
     console.log("Combined output path : ", outputDirectory + path.sep + outputFilename );
+    */
 
-    process.exit(0);
 };
 
 Flow().then( () => {
-    console.log("Executing fully done");
+    //console.log("Executing fully done");
+    process.exit(0);
 }).catch( (reason) => {
     console.error("Top level error " + reason);
+    process.exit(3);
 });
 
 /*

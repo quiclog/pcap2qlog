@@ -29,7 +29,7 @@ export class PCAPToJSON{
 
             // /wireshark/run/tshark --no-duplicate-keys -r pcap.pcap -T json -o tls.keylog_file:/srv/secrets.keys > output.json
 
-            console.log("About to exec tshark");
+            //console.log("About to exec tshark");
             let option = "";
             if( secretsPath )
                 option = `-o tls.keylog_file:${secretsPath}`;
@@ -41,12 +41,12 @@ export class PCAPToJSON{
 
                 clearTimeout(timer);
 
-                console.log("Execed tshark");
+                //console.log("Execed tshark");
 
                 if( error ){ 
-                    console.log("-----------------------------------------");    
-                    console.log("TransformToJSON : ERROR : ", error, stderr, pcapPath, outputPath);
-                    console.log("-----------------------------------------"); 
+                    //console.log("-----------------------------------------");    
+                    //console.log("TransformToJSON : ERROR : ", error, stderr, pcapPath, outputPath);
+                    //console.log("-----------------------------------------"); 
 
                     rejecter( "tshark:TransformToJSON : error : " + error );
                 }
