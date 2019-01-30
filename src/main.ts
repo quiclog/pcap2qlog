@@ -6,7 +6,7 @@ const readFileAsync = promisify(fs.readFile);
 const writeFileAsync = promisify(fs.writeFile);
 
 import {Downloader} from "./flow/downloader";
-import { mkDirByPathSync, createHash } from "./util/FileUtil";
+import { mkDirByPathSync, createHash, fileIsJSON, fileIsPCAP, fileIsSECRETS, fileIsQLOG } from "./util/FileUtil";
 import {PCAPToJSON} from "./flow/pcaptojson";
 import {JSONToQLog} from "./flow/jsontoqlog";
 import * as qlog from "@quictools/qlog-schema";
@@ -82,7 +82,7 @@ async function Flow() {
     let inputListRawString:string = "";
 
     if( !inputIsList ){
-        if( input_file.indexOf(".json") >= 0 ){ // tshark json file
+        if( fileIsJSON(input_file) ){ // tshark json file
             inputList.push( {capture : input_file, capture_original: input_file } );
         }
         else{
@@ -123,35 +123,26 @@ async function Flow() {
     // 2. now we have a nice list of files (possibly with secrets) that we would like to download
     // These files can either be local or remote, so we should always download them first if needed
 
-    // TODO: we are relying A LOT on keeping the extensions on files intact for our logic
-    // this can probably be done better, but that's just the way it is for now
-
     let download = async function(capt:ICapture, outputDirectory:string):Promise<ICapture> {
         //let output:ICapture = { capture: "", capture_original: capt.capture_original, secrets_original: capt.secrets_original };
 
         if( capt.error )
             return capt;
 
-        let ext = path.extname(capt.capture); 
-        if( !ext || ext.length == 0 ){
-            capt.error = "Filepath did not contain an extension, this is required! " + capt.capture_original;
+        // we can't just throw errors, because that would fail the full Promise.all, 
+        // while we just want to skip the files that don't work and show an error message
+        try{
+            capt.capture = await Downloader.DownloadIfRemote( capt.capture, tempDirectory );
         }
-        else{
-            // we can't just throw errors, because that would fail the full Promise.all, 
-            // while we just want to skip the files that don't work and show an error message
+        catch(e){
+            capt.error = e;
+        }
+        if( capt.secrets ){
             try{
-                capt.capture = await Downloader.DownloadIfRemote( capt.capture, tempDirectory );
+                capt.secrets = await Downloader.DownloadIfRemote( capt.secrets, tempDirectory );
             }
             catch(e){
                 capt.error = e;
-            }
-            if( capt.secrets ){
-                try{
-                    capt.secrets = await Downloader.DownloadIfRemote( capt.secrets, tempDirectory );
-                }
-                catch(e){
-                    capt.error = e;
-                }
             }
         }
 
@@ -174,7 +165,7 @@ async function Flow() {
         if( capt.error )
             return capt;
 
-        if( path.extname(capt.capture) == ".json" || path.extname(capt.capture) == ".qlog" )
+        if( fileIsJSON(capt.capture) || fileIsQLOG(capt.capture) )
             return capt;
 
         // TODO: we explicitly do NOT check for .pcap or .pcapng here to allow for most flexibility
@@ -204,7 +195,7 @@ async function Flow() {
         if( capt.error )
             return capt;
 
-        if( path.extname(capt.capture) == ".qlog" ){
+        if( fileIsQLOG(capt.capture) ){
             // we already had a qlog file from the beginning
             // just read it and use it directly
             let fileContents:Buffer = await readFileAsync( capt.capture );

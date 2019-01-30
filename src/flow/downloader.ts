@@ -1,5 +1,6 @@
 import {exec, execSync} from "child_process";
 import * as path from "path";
+import { getFileExtension } from "../util/FileUtil";
 
 export class Downloader{
 
@@ -9,7 +10,7 @@ export class Downloader{
             //console.log("File is a URL, downloading...", inputPath, outputDirectory );
     
             let randomFilename = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-            randomFilename += path.extname( inputPath );
+            randomFilename += getFileExtension( inputPath );
             let outputPath:string = outputDirectory + path.sep + randomFilename;
     
             return Downloader.DownloadAsync( inputPath, outputPath );
