@@ -44,14 +44,17 @@ export class ParserPCAP {
             let time_relative: number = Math.round((time - connection.starttime) * 1000);
     
             let header = {} as qlog.IPacketHeader;
-    
+
             if (quic['quic.header_form'] == '1') // LONG header
             {
+
                 header.form = 'long';
                 header.type = PCAPUtil.getPacketType(quic['quic.long.packet_type']);
                 header.version = quic['quic.version'];
-                header.scid = quic['quic.scid'].replace(/:/g, '');
-                header.dcid = quic['quic.dcid'].replace(/:/g, '');
+                let scid:string = (typeof quic['quic.scid'] === "string") ? quic['quic.scid'] : quic['quic.scid'][0]; 
+                header.scid = scid.replace(/:/g, '');
+                let dcid:string = (typeof quic['quic.dcid'] === "string") ? quic['quic.dcid'] : quic['quic.dcid'][0];
+                header.dcid = dcid.replace(/:/g, '');
                 header.scil = quic['quic.scil'].replace(/:/g, '');
                 header.dcil = quic['quic.dcil'].replace(/:/g, '');
                 header.payload_length = quic['quic.length'];
@@ -59,7 +62,8 @@ export class ParserPCAP {
             }
             else {
                 header.form = 'short';
-                header.dcid = quic['quic.dcid'].replace(/:/g, '');
+                let dcid:string = (typeof quic['quic.dcid'] === "string") ? quic['quic.dcid'] : quic['quic.dcid'][0];
+                header.dcid = dcid.replace(/:/g, '');
                 header.payload_length = 0; // TODO!
                 header.packet_number = quic['quic.packet_number_full'];
             }
@@ -93,7 +97,6 @@ export class ParserPCAP {
                 entry
             ]);
         }
-    
 
         let output: qlog.IQLog;
         output = {
