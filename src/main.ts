@@ -10,6 +10,7 @@ import { mkDirByPathSync, createHash, fileIsJSON, fileIsPCAP, fileIsSECRETS, fil
 import {PCAPToJSON} from "./flow/pcaptojson";
 import {JSONToQLog} from "./flow/jsontoqlog";
 import * as qlog from "@quictools/qlog-schema";
+import { VantagePointType, ITrace, IError } from "@quictools/qlog-schema";
 
 // Parse CLI arguments
 let args = require('minimist')(process.argv.slice(2));
@@ -229,9 +230,11 @@ async function Flow() {
     // to make a new FULL qlog that combines all of them 
 
     let combined:qlog.IQLog = {
-        qlog_version: "0.1",
+        qlog_version: "draft-01",
+        // TODO Title?
         description: inputListDescription,
-        connections: []
+        // TODO Summary?
+        traces: []
     };
 
     for( let capt of transformFiles ){
@@ -242,26 +245,23 @@ async function Flow() {
 
             // we basically just throw away all the top-level qlog stuff 
             // and transfer over all connection-specific information to the combined file
-            for( let connection of capt.qlog.connections ){
-                connection.metadata = { description: capt.description, filename: capt.capture_original };
-                combined.connections.push( connection );
+            for( let trace of capt.qlog.traces ){
+                if ( (trace as ITrace).description !== undefined ) {
+                    trace = trace as ITrace;
+                    trace.description = capt.description;
+                }
+
+                combined.traces.push( trace );
             }
         }
         else if( capt.error ){
             // we want to reflect the errors in the resulting qlog file instead of just returning nothing
-            // so we pretend we have a connection, but just set the metadata to the error
-            let connection:qlog.IConnection = {
-                quic_version: "unknown",
-                vantagepoint: qlog.VantagePoint.NETWORK,
-                connectionid: "unknown",
-                starttime: 0,
-                fields: [],
-                events: [],
-
-                metadata: { description: ("" + capt.error), filename: capt.capture_original }
+            const err:qlog.IError = {
+                error_description: ("" + capt.error),
+                uri: capt.capture_original,
             };
 
-            combined.connections.push( connection );
+            combined.traces.push( err );
         }
         else{
             console.error("main:combining : something went wrong. we have a capture we cannot process.", capt);
