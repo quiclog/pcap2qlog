@@ -28,6 +28,8 @@ export class ParserPCAP {
             // in reality, they could potentially contain more, so we should support that in the future!
             // Or at least check for it... there is a "connectionNr" field in there somewhere
             this.trace = {
+                title: "Connection 1",
+                description: "Connection 1 in qlog from pcap " + originalFile,
                 vantagepoint: {
                     name: "TODO",
                     type: VantagePointType.network,
@@ -278,7 +280,7 @@ export class ParserPCAP {
             let output: qlog.IQLog;
             output = {
                 qlog_version: "draft-01",
-                title: "qlog converted from " + originalFile,
+                title: "" + originalFile,
                 description: "qlog converted from " + originalFile,
                 traces: [pcapParser.trace]
             };
