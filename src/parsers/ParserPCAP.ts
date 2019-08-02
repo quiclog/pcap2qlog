@@ -278,7 +278,8 @@ export class ParserPCAP {
             let output: qlog.IQLog;
             output = {
                 qlog_version: "draft-01",
-                description: "TODO: SET",
+                title: "qlog converted from " + originalFile,
+                description: "qlog converted from " + originalFile,
                 traces: [pcapParser.trace]
             };
 
