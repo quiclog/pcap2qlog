@@ -10,11 +10,11 @@ const writeFileAsync = promisify(fs.writeFile);
 
 export class JSONToQLog{
 
-    public static async TransformToQLog(jsonPath:string, outputDirectory:string, secretsPath?:string):Promise<qlog.IQLog> {
+    public static async TransformToQLog(jsonPath:string, outputDirectory:string,  originalFile: string, secretsPath?:string):Promise<qlog.IQLog> {
 
         // assumptions:
         // - jsonPath and secretsPath are LOCAL (if it was a URL, it has to be pre-downloaded)
-        // - the .json file is the DECRYPTED output of tshark when run on a .pcap or .pcapng 
+        // - the .json file is the DECRYPTED output of tshark when run on a .pcap or .pcapng
         // - outputDirectory exists
 
         let fileContents:Buffer = await readFileAsync(jsonPath);
@@ -23,20 +23,20 @@ export class JSONToQLog{
         let secretsContents:any = undefined;
         if( secretsPath ){
             let secretsFileContents:Buffer = await readFileAsync(secretsPath);
-            // TODO :parse the secrets 
+            // TODO :parse the secrets
             secretsContents = secretsFileContents.toString();
         }
 
 
-        // TODO: properly deal with different versions of QUIC and address the correct parser 
-        // see how we did this in @quictools/qlog-schema and replicate something similar here 
-        let qlog:qlog.IQLog = ParserPCAP.Parse( jsonContents, secretsContents );
+        // TODO: properly deal with different versions of QUIC and address the correct parser
+        // see how we did this in @quictools/qlog-schema and replicate something similar here
+        let qlog:qlog.IQLog = ParserPCAP.Parse( jsonContents, originalFile, secretsContents );
 
         // we could write this to file directly now
         // BUT we want to aggregate possible different IQLogs together in 1 combined/grouped IQLog before writing the final output
         // so we return the QLog instead of writing, so the caller can decide what to do
         // (otherwhise we would write here and have to re-read again later, which isn't very efficient)
-    
+
         return qlog;
     }
-}   
+}

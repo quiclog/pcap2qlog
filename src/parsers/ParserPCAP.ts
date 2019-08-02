@@ -1,6 +1,7 @@
 import * as qlog from "@quictools/qlog-schema";
 import {PCAPUtil} from "../util/PCAPUtil";
 import { VantagePointType, EventField, EventCategory, TransportEventType, QuicFrame, QUICFrameTypeName, IAckFrame, IPaddingFrame, IPingFrame, IResetStreamFrame, IStopSendingFrame, ICryptoFrame, IStreamFrame, INewTokenFrame, IUnknownFrame, IMaxStreamDataFrame, IMaxStreamsFrame, IMaxDataFrame, IDataBlockedFrame, IStreamDataBlockedFrame, IStreamsBlockedFrame, INewConnectionIDFrame, IRetireConnectionIDFrame, IPathChallengeFrame, IPathResponseFrame, IConnectionCloseFrame, ErrorSpace, TransportError, ApplicationError, ConnectivityEventType, IEventSpinBitUpdate, ConnectivityEventTrigger, IEventPacketSent, IEventConnectionClose, IALPNUpdate } from "@quictools/qlog-schema";
+import { pathToFileURL } from "url";
 
 export class ParserPCAP {
         public clientCID: string;
@@ -17,7 +18,7 @@ export class ParserPCAP {
         public currentVersion: string;
         public selectedALPN: string = "";
 
-        constructor(private jsonTrace: any) {
+        constructor(private jsonTrace: any, originalFile: string) {
             this.clientCID = jsonTrace[0]["_source"]["layers"]["quic"]["quic.scid"].replace(/:/g, ''); // Can change later
             this.serverCID = jsonTrace[0]["_source"]["layers"]["quic"]["quic.dcid"].replace(/:/g, ''); // Must change in handshake, can change later as well
             this.ODCID = this.serverCID;
@@ -35,7 +36,7 @@ export class ParserPCAP {
                 configuration: {
                     time_offset: "0",
                     time_units: "ms",
-                    original_uris: [], // TODO
+                    original_uris: [ pathToFileURL(originalFile).toString() ],
                 },
                 common_fields: {
                     group_id: this.getConnectionID(), // Original destination connection id
@@ -159,8 +160,8 @@ export class ParserPCAP {
             }
         }
 
-        public static Parse(jsonContents:any, secretsContents:any):qlog.IQLog {
-            let pcapParser = new ParserPCAP( jsonContents );
+        public static Parse(jsonContents:any, originalFile: string, secretsContents:any):qlog.IQLog {
+            let pcapParser = new ParserPCAP( jsonContents, originalFile );
 
             if( secretsContents ){
                 //TODO: add keys to the qlog output (if available)
@@ -352,7 +353,7 @@ export class ParserPCAP {
                             {
                                 old: parser.selectedALPN,
                                 new: alpns[0],
-                            } as IALPNUpdate,     
+                            } as IALPNUpdate,
                         ]);
                         parser.selectedALPN = alpns[0];
                     }

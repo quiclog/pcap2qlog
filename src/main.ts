@@ -27,8 +27,8 @@ let args = require('minimist')(process.argv.slice(2));
 */
 // then use the --list option
 // OR a single file-path (or URL), with or without the secrets_file set
-// then use the --input option 
-// e.g., 
+// then use the --input option
+// e.g.,
 // node main.js --list=/allinone.json --output=/srv/qvis-cache
 // OR
 // node main.js --input=/decrypted.json  --output=/srv/qvis-cache
@@ -36,11 +36,15 @@ let args = require('minimist')(process.argv.slice(2));
 // node main.js --input=/encrypted.pcap --secrets=/secrets.keys  --output=/srv/qvis-cache
 // NOTE: this tool can also be used to merge together multiple (partial) qlog files
 //  for this, just pass the files with the --list option
+// This tool uses tshark for the conversion of pcap to json and should therefore be given a path to your local install of the program
+// This can be done using the --tshark flag (or -t)
+// The default tshark location used is /wireshark/run/tshark which will generally not be correct if you are running this outside of a docker. It is thus recommended to pass the path to your local install.
 let input_list: string           = args.l || args.list;
 let input_file: string           = args.i || args.input;
 let secrets_file: string         = args.s || args.secrets;
 let output_directory: string     = args.o || args.output    || "/srv/qvis-cache"; // output will be placed in args.o/cache/generatedfilename.json  and temp storage is  args.o/inputs/
 let output_path: string          = args.p || args.outputpath;   // output will be placed in args.p  and temp storage is  args.o/inputs/
+let tsharkLocation: string       = args.t || args.tshark || "/wireshark/run/tshark"; // Path to the TShark executable
 
 if( !input_file && !input_list ){
     console.error("No input file or list of files specified, use --input or --list");
@@ -56,7 +60,7 @@ async function Flow() {
 
     let inputIsList:boolean = input_list !== undefined;
 
-    // each session gets their own temporary input directory so we can easily remove it from disk after everything is done 
+    // each session gets their own temporary input directory so we can easily remove it from disk after everything is done
     let tempDirectory = path.resolve( output_directory + path.sep + "inputs" );
     tempDirectory += path.sep + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     mkDirByPathSync( tempDirectory );
@@ -130,7 +134,7 @@ async function Flow() {
         if( capt.error )
             return capt;
 
-        // we can't just throw errors, because that would fail the full Promise.all, 
+        // we can't just throw errors, because that would fail the full Promise.all,
         // while we just want to skip the files that don't work and show an error message
         try{
             capt.capture = await Downloader.DownloadIfRemote( capt.capture, tempDirectory );
@@ -152,7 +156,7 @@ async function Flow() {
 
     // note: we could do download + tshark calls in 1 long async function, but for clarity we keep them separate
     // performance should be relatively ok, unless there is a single file that is MUCH bigger than the rest of course
-    let downloadPromises = []; 
+    let downloadPromises = [];
     for( let capture of inputList ){
         downloadPromises.push( download(capture, tempDirectory) );
     }
@@ -171,18 +175,18 @@ async function Flow() {
 
         // TODO: we explicitly do NOT check for .pcap or .pcapng here to allow for most flexibility
         // this may come back to bite us in the *ss later
-        
+
         try{
-            capt.capture = await PCAPToJSON.TransformToJSON( capt.capture, tempDirectory, capt.secrets );
+            capt.capture = await PCAPToJSON.TransformToJSON( capt.capture, tempDirectory, tsharkLocation, capt.secrets );
         }
         catch(e){
             capt.error = e;
         }
-        
+
         return capt;
     };
 
-    let tsharkPromises = []; 
+    let tsharkPromises = [];
     for( let capture of downloadedFiles ){
         tsharkPromises.push( tshark(capture, tempDirectory) );
     }
@@ -206,16 +210,16 @@ async function Flow() {
 
         try{
             // we don't write to file here, but pass the qlog object around directly to write a combined file later
-            capt.qlog = await JSONToQLog.TransformToQLog( capt.capture, tempDirectory, capt.secrets );
+            capt.qlog = await JSONToQLog.TransformToQLog( capt.capture, tempDirectory, capt.capture_original, capt.secrets );
         }
         catch(e){
             capt.error = e;
         }
-        
+
         return capt;
     }
 
-    let transformPromises = []; 
+    let transformPromises = [];
     for( let capture of tsharkFiles ){
         transformPromises.push( transform(capture, tempDirectory) );
     }
@@ -227,7 +231,7 @@ async function Flow() {
     // If there are indeed multiple, we want to combine those into a single big qlog file
 
     // the capt.qlog data structures are FULL qlogs, so we need to extract the separate connections
-    // to make a new FULL qlog that combines all of them 
+    // to make a new FULL qlog that combines all of them
 
     let combined:qlog.IQLog = {
         qlog_version: "draft-01",
@@ -243,7 +247,7 @@ async function Flow() {
             //if( !capt.description )
             //    capt.description = capt.capture_original; // use the filename as the description
 
-            // we basically just throw away all the top-level qlog stuff 
+            // we basically just throw away all the top-level qlog stuff
             // and transfer over all connection-specific information to the combined file
             for( let trace of capt.qlog.traces ){
                 if ( (trace as ITrace).description !== undefined ) {
@@ -274,7 +278,7 @@ async function Flow() {
     let outputPath:string = output_path;
     if( !outputPath ){
         let outputFilename:string = calculateStableHash() + ".qlog";
-        
+
         let outputDirectory = path.resolve( output_directory + path.sep + "cache" );
         mkDirByPathSync( outputDirectory );
 
