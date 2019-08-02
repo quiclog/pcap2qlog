@@ -10,7 +10,7 @@ import { mkDirByPathSync, createHash, fileIsJSON, fileIsPCAP, fileIsSECRETS, fil
 import {PCAPToJSON} from "./flow/pcaptojson";
 import {JSONToQLog} from "./flow/jsontoqlog";
 import * as qlog from "@quictools/qlog-schema";
-import { VantagePointType, ITrace, IError } from "@quictools/qlog-schema";
+import { VantagePointType, ITrace, ITraceError } from "@quictools/qlog-schema";
 
 // Parse CLI arguments
 let args = require('minimist')(process.argv.slice(2));
@@ -260,7 +260,7 @@ async function Flow() {
         }
         else if( capt.error ){
             // we want to reflect the errors in the resulting qlog file instead of just returning nothing
-            const err:qlog.IError = {
+            const err:qlog.ITraceError = {
                 error_description: ("" + capt.error),
                 uri: capt.capture_original,
             };

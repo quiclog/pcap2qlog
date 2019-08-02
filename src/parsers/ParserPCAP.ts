@@ -30,7 +30,7 @@ export class ParserPCAP {
             this.trace = {
                 title: "Connection 1",
                 description: "Connection 1 in qlog from pcap " + originalFile,
-                vantagepoint: {
+                vantage_point: {
                     name: "TODO",
                     type: VantagePointType.network,
                     flow: VantagePointType.client, // Perspective from which the trace is made, e.g. packet_sent from flow=client means that the client has sent a packet while packet_sent from flow=server means that the server sent it.

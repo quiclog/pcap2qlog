@@ -3,7 +3,8 @@
     "description": "",
     "traces": [
         {
-            "vantagepoint": {
+            "title": "Connection 1",
+            "vantage_point": {
                 "name": "TODO",
                 "type": "network",
                 "flow": "client"
@@ -12,7 +13,7 @@
                 "time_offset": "0",
                 "time_units": "ms",
                 "original_uris": [
-                    "file:///home/tom/Code/pcap2qlog/examples/draft-01/new_cid.json"
+                    "file:///home/tom/Code/pcap2qlog/examples/draft-01/new_cid.pcap"
                 ]
             },
             "common_fields": {
