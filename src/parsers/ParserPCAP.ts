@@ -162,7 +162,7 @@ export class ParserPCAP {
             }
         }
 
-        public static Parse(jsonContents:any, originalFile: string, secretsContents:any):qlog.IQLog {
+        public static Parse(jsonContents:any, originalFile: string, logRawPayloads: boolean, secretsContents:any):qlog.IQLog {
             let pcapParser = new ParserPCAP( jsonContents, originalFile );
 
             if( secretsContents ){
@@ -176,32 +176,32 @@ export class ParserPCAP {
                 let time = parseFloat(frame['frame.time_epoch']);
                 let time_relative: number = pcapParser.trace.common_fields !== undefined && pcapParser.trace.common_fields.reference_time !== undefined ? Math.round((time - parseFloat(pcapParser.trace.common_fields.reference_time)) * 1000) : -1;
 
-                let header = {} as qlog.IPacketHeader;
-
                 function extractEventsFromPacket(jsonPacket:any) {
+                    let header = {} as qlog.IPacketHeader;
+
                     if (jsonPacket['quic.header_form'] == '1') // LONG header
                     {
-                        header.form = 'long';
                         header.version = jsonPacket['quic.version'];
                         header.scid = jsonPacket["quic.scid"].replace(/:/g, '');
                         header.dcid = jsonPacket["quic.dcid"].replace(/:/g, '');
                         header.scil = jsonPacket['quic.scil'].replace(/:/g, '');
                         header.dcil = jsonPacket['quic.dcil'].replace(/:/g, '');
-                        header.payload_length = jsonPacket['quic.length'];
-                        header.packet_number = jsonPacket['quic.packet_number_full'];
+                        header.payload_length = jsonPacket['quic.payload'].replace(/:/g, '').length / 2;
+                        header.packet_number = jsonPacket['quic.packet_number'];
+                        header.packet_size = parseInt(jsonPacket['quic.packet_length']);
                     }
-                    else {
-                        header.form = 'short';
+                    else { // SHORT
                         header.dcid = jsonPacket['quic.dcid'].replace(/:/g, '');
                         header.payload_length = jsonPacket['quic.protected_payload'].replace(/:/g, '').length / 2;
-                        header.packet_number = jsonPacket['quic.packet_number_full'];
+                        header.packet_number = jsonPacket['quic.packet_number'];
+                        header.packet_size = parseInt(jsonPacket['quic.packet_length']);
                     }
 
                     const isVersionNegotation: boolean = header.version !== undefined ? parseInt(header.version, 16) === 0x00 : false;
 
                     // Both IEventPacketSent and IEventPacketReceived have the same structure so we just use one of the two for type checking
                     const entry: IEventPacketSent = {
-                        type: header.form === "long" ? (isVersionNegotation ? qlog.PacketType.version_negotation : PCAPUtil.getPacketType(parseInt(jsonPacket['quic.long.packet_type']))) : qlog.PacketType.onertt,
+                        type: jsonPacket['quic.header_form'] === "1" ? (isVersionNegotation ? qlog.PacketType.version_negotation : PCAPUtil.getPacketType(parseInt(jsonPacket['quic.long.packet_type']))) : qlog.PacketType.onertt,
                         header: header,
                     };
 
@@ -210,10 +210,10 @@ export class ParserPCAP {
                     // If there are multiple quic frames, extract data from each of them. If there is only a single frame quic.frame will be an object instead of an array
                     if (Array.isArray(jsonPacket["quic.frame"])) {
                         for (const frame of jsonPacket["quic.frame"]) {
-                            entry.frames.push(ParserPCAP.extractQlogFrame(frame, pcapParser, header.dcid, time_relative.toString()));
+                            entry.frames.push(ParserPCAP.extractQlogFrame(frame, pcapParser, jsonPacket["quic.dcid"].replace(/:/g, ''), time_relative.toString(), logRawPayloads));
                         }
                     } else if (jsonPacket["quic.frame"] !== undefined) {
-                        entry.frames.push(ParserPCAP.extractQlogFrame(jsonPacket["quic.frame"], pcapParser, header.dcid, time_relative.toString()));
+                        entry.frames.push(ParserPCAP.extractQlogFrame(jsonPacket["quic.frame"], pcapParser, jsonPacket["quic.dcid"].replace(/:/g, ''), time_relative.toString(), logRawPayloads));
                     }
 
                     //x = [] as qlog.IEventPacketRX;
@@ -228,7 +228,7 @@ export class ParserPCAP {
                         entry
                     ]);
 
-                    if (header.form === "long") {
+                    if (jsonPacket['quic.header_form'] === "1") {
                         if (header.version !== pcapParser.currentVersion && header.version !== undefined && parseInt(header.version, 16) !== 0) {
                             pcapParser.addEvent([
                                 time_relative.toString(),
@@ -242,7 +242,7 @@ export class ParserPCAP {
                             ]);
                             pcapParser.currentVersion = header.version;
                         }
-                    } else if (header.form === "short") {
+                    } else if (jsonPacket['quic.header_form'] === "0") {
                         pcapParser.checkSpinBitUpdate(jsonPacket["quic.spin_bit"], time_relative.toString());
                     }
                 }
@@ -329,7 +329,7 @@ export class ParserPCAP {
         }
 
         // TODO move to util file
-        public static extractQlogFrame(tsharkFrame: any, parser: ParserPCAP, dcid: string, relativeTime: string): QuicFrame {
+        public static extractQlogFrame(tsharkFrame: any, parser: ParserPCAP, dcid: string, relativeTime: string, logRawPayloads: boolean): QuicFrame {
             const frameType = PCAPUtil.getFrameTypeName(parseInt(tsharkFrame["quic.frame_type"]));
             const scid: string = dcid === parser.clientCID ? parser.serverCID : parser.clientCID;
 
@@ -364,7 +364,7 @@ export class ParserPCAP {
                 case QUICFrameTypeName.new_token:
                     return this.convertNewTokenFrame(tsharkFrame);
                 case QUICFrameTypeName.stream:
-                    return this.convertStreamFrame(tsharkFrame);
+                    return this.convertStreamFrame(tsharkFrame, logRawPayloads);
                 case QUICFrameTypeName.max_data:
                     return this.convertMaxDataFrame(tsharkFrame);
                 case QUICFrameTypeName.max_stream_data:
@@ -418,10 +418,31 @@ export class ParserPCAP {
 
         public static convertAckFrame(tsharkAckFrame: any): IAckFrame {
             const isEcn: boolean = tsharkAckFrame["quic.frame_type"] === "3" ? true : false;
+            const ackRangeCount: number = parseInt(tsharkAckFrame['quic.ack.ack_range_count']);
+            const ackedRanges: [string, string][] = [];
+            let topAck: number = parseInt(tsharkAckFrame['quic.ack.largest_acknowledged']);
+            let bottomAck = topAck - parseInt(tsharkAckFrame['quic.ack.first_ack_range']);
+
+            ackedRanges.push([bottomAck.toString(), topAck.toString()]);
+            if (ackRangeCount === 1) { // 1 gap
+                let gap: number = parseInt(tsharkAckFrame['quic.ack.gap']) + 2;
+                topAck = bottomAck - gap;
+                bottomAck = topAck - parseInt(tsharkAckFrame['quic.ack.ack_range']);
+                ackedRanges.push([bottomAck.toString(), topAck.toString()]);
+            } else if (ackRangeCount > 1) { // multiple gaps
+                let gap: number;
+                for (let i = 0; i < ackRangeCount; ++i) {
+                    gap = parseInt(tsharkAckFrame['quic.ack.gap'][i]) + 2;
+                    topAck = bottomAck - gap;
+                    bottomAck = topAck - parseInt(tsharkAckFrame['quic.ack.ack_range'][i]);
+                    ackedRanges.push([bottomAck.toString(), topAck.toString()]);
+                }
+            }
+
             return {
                 frame_type: QUICFrameTypeName.ack,
                 ack_delay: tsharkAckFrame["quic.ack.ack_delay"],
-                acked_ranges: [[tsharkAckFrame["quic.ack.first_ack_range"], tsharkAckFrame["quic.ack.largest_acknowledged"]]],
+                acked_ranges: ackedRanges,
                 ce: isEcn ? tsharkAckFrame["quic.ack.ecn_ce_count"] : undefined,
                 ect0: isEcn ? tsharkAckFrame["quic.ack.ect0_count"] : undefined,
                 ect1: isEcn ? tsharkAckFrame["quic.ack.ect1_count"] : undefined,
@@ -466,17 +487,17 @@ export class ParserPCAP {
         }
 
 
-        public static convertStreamFrame(tsharkStreamFrame: any): IStreamFrame {
+        public static convertStreamFrame(tsharkStreamFrame: any, logRawPayloads: boolean): IStreamFrame {
             return {
                 frame_type: QUICFrameTypeName.stream,
 
                 id: tsharkStreamFrame["quic.stream.stream_id"],
 
-                offset: tsharkStreamFrame["quic.stream.offset"],
+                offset: tsharkStreamFrame['quic.frame_type_tree']['quic.stream.off'] === "1" ? tsharkStreamFrame["quic.stream.offset"] : "0",
                 length: tsharkStreamFrame["quic.stream.length"],
 
                 fin: tsharkStreamFrame["quic.frame_type_tree"]["quic.stream.fin"] === "1",
-                raw: tsharkStreamFrame["quic.stream_data"].replace(/:/g, ''),
+                raw: logRawPayloads ? tsharkStreamFrame["quic.stream_data"].replace(/:/g, '') : undefined,
             };
         }
 

@@ -26,7 +26,9 @@
             "eth.dst_resolved": "52:7c:07:b0:36:3e",
             "eth.addr": "52:7c:07:b0:36:3e",
             "eth.addr_resolved": "52:7c:07:b0:36:3e",
+            "eth.dst.lg": "1",
             "eth.lg": "1",
+            "eth.dst.ig": "0",
             "eth.ig": "0"
           },
           "eth.src": "de:ad:be:ef:12:38",
@@ -34,7 +36,9 @@
             "eth.src_resolved": "de:ad:be:ef:12:38",
             "eth.addr": "de:ad:be:ef:12:38",
             "eth.addr_resolved": "de:ad:be:ef:12:38",
+            "eth.src.lg": "1",
             "eth.lg": "1",
+            "eth.src.ig": "0",
             "eth.ig": "0"
           },
           "eth.type": "0x00000800"
@@ -93,6 +97,7 @@
           "QUIC Connection information": {
             "quic.connection.number": "0"
           },
+          "quic.packet_length": "1251",
           "quic.header_form": "1",
           "quic.fixed_bit": "1",
           "quic.long.packet_type": "0",
@@ -306,7 +311,9 @@
             "eth.dst_resolved": "de:ad:be:ef:12:38",
             "eth.addr": "de:ad:be:ef:12:38",
             "eth.addr_resolved": "de:ad:be:ef:12:38",
+            "eth.dst.lg": "1",
             "eth.lg": "1",
+            "eth.dst.ig": "0",
             "eth.ig": "0"
           },
           "eth.src": "52:7c:07:b0:36:3e",
@@ -314,7 +321,9 @@
             "eth.src_resolved": "52:7c:07:b0:36:3e",
             "eth.addr": "52:7c:07:b0:36:3e",
             "eth.addr_resolved": "52:7c:07:b0:36:3e",
+            "eth.src.lg": "1",
             "eth.lg": "1",
+            "eth.src.ig": "0",
             "eth.ig": "0"
           },
           "eth.type": "0x00000800"
@@ -374,6 +383,7 @@
             "QUIC Connection information": {
               "quic.connection.number": "0"
             },
+            "quic.packet_length": "208",
             "quic.header_form": "1",
             "quic.fixed_bit": "1",
             "quic.long.packet_type": "0",
@@ -432,6 +442,7 @@
             ]
           },
           {
+            "quic.packet_length": "626",
             "quic.header_form": "1",
             "quic.fixed_bit": "1",
             "quic.long.packet_type": "2",
@@ -669,7 +680,9 @@
             "eth.dst_resolved": "52:7c:07:b0:36:3e",
             "eth.addr": "52:7c:07:b0:36:3e",
             "eth.addr_resolved": "52:7c:07:b0:36:3e",
+            "eth.dst.lg": "1",
             "eth.lg": "1",
+            "eth.dst.ig": "0",
             "eth.ig": "0"
           },
           "eth.src": "de:ad:be:ef:12:38",
@@ -677,7 +690,9 @@
             "eth.src_resolved": "de:ad:be:ef:12:38",
             "eth.addr": "de:ad:be:ef:12:38",
             "eth.addr_resolved": "de:ad:be:ef:12:38",
+            "eth.src.lg": "1",
             "eth.lg": "1",
+            "eth.src.ig": "0",
             "eth.ig": "0"
           },
           "eth.type": "0x00000800"
@@ -736,6 +751,7 @@
           "QUIC Connection information": {
             "quic.connection.number": "0"
           },
+          "quic.packet_length": "48",
           "quic.header_form": "1",
           "quic.fixed_bit": "1",
           "quic.long.packet_type": "0",
@@ -788,7 +804,9 @@
             "eth.dst_resolved": "52:7c:07:b0:36:3e",
             "eth.addr": "52:7c:07:b0:36:3e",
             "eth.addr_resolved": "52:7c:07:b0:36:3e",
+            "eth.dst.lg": "1",
             "eth.lg": "1",
+            "eth.dst.ig": "0",
             "eth.ig": "0"
           },
           "eth.src": "de:ad:be:ef:12:38",
@@ -796,7 +814,9 @@
             "eth.src_resolved": "de:ad:be:ef:12:38",
             "eth.addr": "de:ad:be:ef:12:38",
             "eth.addr_resolved": "de:ad:be:ef:12:38",
+            "eth.src.lg": "1",
             "eth.lg": "1",
+            "eth.src.ig": "0",
             "eth.ig": "0"
           },
           "eth.type": "0x00000800"
@@ -855,6 +875,7 @@
           "QUIC Connection information": {
             "quic.connection.number": "0"
           },
+          "quic.packet_length": "103",
           "quic.header_form": "1",
           "quic.fixed_bit": "1",
           "quic.long.packet_type": "2",
@@ -919,7 +940,9 @@
             "eth.dst_resolved": "de:ad:be:ef:12:38",
             "eth.addr": "de:ad:be:ef:12:38",
             "eth.addr_resolved": "de:ad:be:ef:12:38",
+            "eth.dst.lg": "1",
             "eth.lg": "1",
+            "eth.dst.ig": "0",
             "eth.ig": "0"
           },
           "eth.src": "52:7c:07:b0:36:3e",
@@ -927,7 +950,9 @@
             "eth.src_resolved": "52:7c:07:b0:36:3e",
             "eth.addr": "52:7c:07:b0:36:3e",
             "eth.addr_resolved": "52:7c:07:b0:36:3e",
+            "eth.src.lg": "1",
             "eth.lg": "1",
+            "eth.src.ig": "0",
             "eth.ig": "0"
           },
           "eth.type": "0x00000800"
@@ -986,6 +1011,7 @@
           "QUIC Connection information": {
             "quic.connection.number": "0"
           },
+          "quic.packet_length": "138",
           "quic.header_form": "0",
           "quic.fixed_bit": "1",
           "quic.spin_bit": "0",
@@ -1060,7 +1086,9 @@
             "eth.dst_resolved": "52:7c:07:b0:36:3e",
             "eth.addr": "52:7c:07:b0:36:3e",
             "eth.addr_resolved": "52:7c:07:b0:36:3e",
+            "eth.dst.lg": "1",
             "eth.lg": "1",
+            "eth.dst.ig": "0",
             "eth.ig": "0"
           },
           "eth.src": "de:ad:be:ef:12:38",
@@ -1068,7 +1096,9 @@
             "eth.src_resolved": "de:ad:be:ef:12:38",
             "eth.addr": "de:ad:be:ef:12:38",
             "eth.addr_resolved": "de:ad:be:ef:12:38",
+            "eth.src.lg": "1",
             "eth.lg": "1",
+            "eth.src.ig": "0",
             "eth.ig": "0"
           },
           "eth.type": "0x00000800"
@@ -1127,6 +1157,7 @@
           "QUIC Connection information": {
             "quic.connection.number": "0"
           },
+          "quic.packet_length": "46",
           "quic.header_form": "0",
           "quic.fixed_bit": "1",
           "quic.spin_bit": "0",
@@ -1178,7 +1209,9 @@
             "eth.dst_resolved": "52:7c:07:b0:36:3e",
             "eth.addr": "52:7c:07:b0:36:3e",
             "eth.addr_resolved": "52:7c:07:b0:36:3e",
+            "eth.dst.lg": "1",
             "eth.lg": "1",
+            "eth.dst.ig": "0",
             "eth.ig": "0"
           },
           "eth.src": "de:ad:be:ef:12:38",
@@ -1186,7 +1219,9 @@
             "eth.src_resolved": "de:ad:be:ef:12:38",
             "eth.addr": "de:ad:be:ef:12:38",
             "eth.addr_resolved": "de:ad:be:ef:12:38",
+            "eth.src.lg": "1",
             "eth.lg": "1",
+            "eth.src.ig": "0",
             "eth.ig": "0"
           },
           "eth.type": "0x00000800"
@@ -1245,6 +1280,7 @@
           "QUIC Connection information": {
             "quic.connection.number": "0"
           },
+          "quic.packet_length": "32",
           "quic.header_form": "0",
           "quic.fixed_bit": "1",
           "quic.spin_bit": "1",
@@ -1292,7 +1328,9 @@
             "eth.dst_resolved": "de:ad:be:ef:12:38",
             "eth.addr": "de:ad:be:ef:12:38",
             "eth.addr_resolved": "de:ad:be:ef:12:38",
+            "eth.dst.lg": "1",
             "eth.lg": "1",
+            "eth.dst.ig": "0",
             "eth.ig": "0"
           },
           "eth.src": "52:7c:07:b0:36:3e",
@@ -1300,7 +1338,9 @@
             "eth.src_resolved": "52:7c:07:b0:36:3e",
             "eth.addr": "52:7c:07:b0:36:3e",
             "eth.addr_resolved": "52:7c:07:b0:36:3e",
+            "eth.src.lg": "1",
             "eth.lg": "1",
+            "eth.src.ig": "0",
             "eth.ig": "0"
           },
           "eth.type": "0x00000800"
@@ -1360,6 +1400,7 @@
             "QUIC Connection information": {
               "quic.connection.number": "0"
             },
+            "quic.packet_length": "47",
             "quic.header_form": "1",
             "quic.fixed_bit": "1",
             "quic.long.packet_type": "2",
@@ -1382,6 +1423,7 @@
             }
           },
           {
+            "quic.packet_length": "124",
             "quic.header_form": "0",
             "quic.fixed_bit": "1",
             "quic.spin_bit": "0",
@@ -1456,7 +1498,9 @@
             "eth.dst_resolved": "52:7c:07:b0:36:3e",
             "eth.addr": "52:7c:07:b0:36:3e",
             "eth.addr_resolved": "52:7c:07:b0:36:3e",
+            "eth.dst.lg": "1",
             "eth.lg": "1",
+            "eth.dst.ig": "0",
             "eth.ig": "0"
           },
           "eth.src": "de:ad:be:ef:12:38",
@@ -1464,7 +1508,9 @@
             "eth.src_resolved": "de:ad:be:ef:12:38",
             "eth.addr": "de:ad:be:ef:12:38",
             "eth.addr_resolved": "de:ad:be:ef:12:38",
+            "eth.src.lg": "1",
             "eth.lg": "1",
+            "eth.src.ig": "0",
             "eth.ig": "0"
           },
           "eth.type": "0x00000800"
@@ -1523,6 +1569,7 @@
           "QUIC Connection information": {
             "quic.connection.number": "0"
           },
+          "quic.packet_length": "32",
           "quic.header_form": "0",
           "quic.fixed_bit": "1",
           "quic.spin_bit": "1",
@@ -1570,7 +1617,9 @@
             "eth.dst_resolved": "de:ad:be:ef:12:38",
             "eth.addr": "de:ad:be:ef:12:38",
             "eth.addr_resolved": "de:ad:be:ef:12:38",
+            "eth.dst.lg": "1",
             "eth.lg": "1",
+            "eth.dst.ig": "0",
             "eth.ig": "0"
           },
           "eth.src": "52:7c:07:b0:36:3e",
@@ -1578,7 +1627,9 @@
             "eth.src_resolved": "52:7c:07:b0:36:3e",
             "eth.addr": "52:7c:07:b0:36:3e",
             "eth.addr_resolved": "52:7c:07:b0:36:3e",
+            "eth.src.lg": "1",
             "eth.lg": "1",
+            "eth.src.ig": "0",
             "eth.ig": "0"
           },
           "eth.type": "0x00000800"
@@ -1637,6 +1688,7 @@
           "QUIC Connection information": {
             "quic.connection.number": "0"
           },
+          "quic.packet_length": "33",
           "quic.header_form": "0",
           "quic.fixed_bit": "1",
           "quic.spin_bit": "1",
@@ -1690,7 +1742,9 @@
             "eth.dst_resolved": "52:7c:07:b0:36:3e",
             "eth.addr": "52:7c:07:b0:36:3e",
             "eth.addr_resolved": "52:7c:07:b0:36:3e",
+            "eth.dst.lg": "1",
             "eth.lg": "1",
+            "eth.dst.ig": "0",
             "eth.ig": "0"
           },
           "eth.src": "de:ad:be:ef:12:38",
@@ -1698,7 +1752,9 @@
             "eth.src_resolved": "de:ad:be:ef:12:38",
             "eth.addr": "de:ad:be:ef:12:38",
             "eth.addr_resolved": "de:ad:be:ef:12:38",
+            "eth.src.lg": "1",
             "eth.lg": "1",
+            "eth.src.ig": "0",
             "eth.ig": "0"
           },
           "eth.type": "0x00000800"
@@ -1757,6 +1813,7 @@
           "QUIC Connection information": {
             "quic.connection.number": "0"
           },
+          "quic.packet_length": "32",
           "quic.header_form": "0",
           "quic.fixed_bit": "1",
           "quic.spin_bit": "0",
@@ -1804,7 +1861,9 @@
             "eth.dst_resolved": "de:ad:be:ef:12:38",
             "eth.addr": "de:ad:be:ef:12:38",
             "eth.addr_resolved": "de:ad:be:ef:12:38",
+            "eth.dst.lg": "1",
             "eth.lg": "1",
+            "eth.dst.ig": "0",
             "eth.ig": "0"
           },
           "eth.src": "52:7c:07:b0:36:3e",
@@ -1812,7 +1871,9 @@
             "eth.src_resolved": "52:7c:07:b0:36:3e",
             "eth.addr": "52:7c:07:b0:36:3e",
             "eth.addr_resolved": "52:7c:07:b0:36:3e",
+            "eth.src.lg": "1",
             "eth.lg": "1",
+            "eth.src.ig": "0",
             "eth.ig": "0"
           },
           "eth.type": "0x00000800"
@@ -1871,6 +1932,7 @@
           "QUIC Connection information": {
             "quic.connection.number": "0"
           },
+          "quic.packet_length": "248",
           "quic.header_form": "0",
           "quic.fixed_bit": "1",
           "quic.spin_bit": "1",
@@ -1935,7 +1997,9 @@
             "eth.dst_resolved": "52:7c:07:b0:36:3e",
             "eth.addr": "52:7c:07:b0:36:3e",
             "eth.addr_resolved": "52:7c:07:b0:36:3e",
+            "eth.dst.lg": "1",
             "eth.lg": "1",
+            "eth.dst.ig": "0",
             "eth.ig": "0"
           },
           "eth.src": "de:ad:be:ef:12:38",
@@ -1943,7 +2007,9 @@
             "eth.src_resolved": "de:ad:be:ef:12:38",
             "eth.addr": "de:ad:be:ef:12:38",
             "eth.addr_resolved": "de:ad:be:ef:12:38",
+            "eth.src.lg": "1",
             "eth.lg": "1",
+            "eth.src.ig": "0",
             "eth.ig": "0"
           },
           "eth.type": "0x00000800"
@@ -2002,6 +2068,7 @@
           "QUIC Connection information": {
             "quic.connection.number": "0"
           },
+          "quic.packet_length": "83",
           "quic.header_form": "0",
           "quic.fixed_bit": "1",
           "quic.spin_bit": "0",
@@ -2082,7 +2149,9 @@
             "eth.dst_resolved": "de:ad:be:ef:12:38",
             "eth.addr": "de:ad:be:ef:12:38",
             "eth.addr_resolved": "de:ad:be:ef:12:38",
+            "eth.dst.lg": "1",
             "eth.lg": "1",
+            "eth.dst.ig": "0",
             "eth.ig": "0"
           },
           "eth.src": "52:7c:07:b0:36:3e",
@@ -2090,7 +2159,9 @@
             "eth.src_resolved": "52:7c:07:b0:36:3e",
             "eth.addr": "52:7c:07:b0:36:3e",
             "eth.addr_resolved": "52:7c:07:b0:36:3e",
+            "eth.src.lg": "1",
             "eth.lg": "1",
+            "eth.src.ig": "0",
             "eth.ig": "0"
           },
           "eth.type": "0x00000800"
@@ -2149,6 +2220,7 @@
           "QUIC Connection information": {
             "quic.connection.number": "0"
           },
+          "quic.packet_length": "31",
           "quic.header_form": "0",
           "quic.fixed_bit": "1",
           "quic.spin_bit": "0",
@@ -2196,7 +2268,9 @@
             "eth.dst_resolved": "de:ad:be:ef:12:38",
             "eth.addr": "de:ad:be:ef:12:38",
             "eth.addr_resolved": "de:ad:be:ef:12:38",
+            "eth.dst.lg": "1",
             "eth.lg": "1",
+            "eth.dst.ig": "0",
             "eth.ig": "0"
           },
           "eth.src": "52:7c:07:b0:36:3e",
@@ -2204,7 +2278,9 @@
             "eth.src_resolved": "52:7c:07:b0:36:3e",
             "eth.addr": "52:7c:07:b0:36:3e",
             "eth.addr_resolved": "52:7c:07:b0:36:3e",
+            "eth.src.lg": "1",
             "eth.lg": "1",
+            "eth.src.ig": "0",
             "eth.ig": "0"
           },
           "eth.type": "0x00000800"
@@ -2263,6 +2339,7 @@
           "QUIC Connection information": {
             "quic.connection.number": "0"
           },
+          "quic.packet_length": "461",
           "quic.header_form": "0",
           "quic.fixed_bit": "1",
           "quic.spin_bit": "0",
@@ -2342,7 +2419,9 @@
             "eth.dst_resolved": "52:7c:07:b0:36:3e",
             "eth.addr": "52:7c:07:b0:36:3e",
             "eth.addr_resolved": "52:7c:07:b0:36:3e",
+            "eth.dst.lg": "1",
             "eth.lg": "1",
+            "eth.dst.ig": "0",
             "eth.ig": "0"
           },
           "eth.src": "de:ad:be:ef:12:38",
@@ -2350,7 +2429,9 @@
             "eth.src_resolved": "de:ad:be:ef:12:38",
             "eth.addr": "de:ad:be:ef:12:38",
             "eth.addr_resolved": "de:ad:be:ef:12:38",
+            "eth.src.lg": "1",
             "eth.lg": "1",
+            "eth.src.ig": "0",
             "eth.ig": "0"
           },
           "eth.type": "0x00000800"
@@ -2409,6 +2490,7 @@
           "QUIC Connection information": {
             "quic.connection.number": "0"
           },
+          "quic.packet_length": "49",
           "quic.header_form": "0",
           "quic.fixed_bit": "1",
           "quic.spin_bit": "1",
@@ -2472,7 +2554,9 @@
             "eth.dst_resolved": "de:ad:be:ef:12:38",
             "eth.addr": "de:ad:be:ef:12:38",
             "eth.addr_resolved": "de:ad:be:ef:12:38",
+            "eth.dst.lg": "1",
             "eth.lg": "1",
+            "eth.dst.ig": "0",
             "eth.ig": "0"
           },
           "eth.src": "52:7c:07:b0:36:3e",
@@ -2480,7 +2564,9 @@
             "eth.src_resolved": "52:7c:07:b0:36:3e",
             "eth.addr": "52:7c:07:b0:36:3e",
             "eth.addr_resolved": "52:7c:07:b0:36:3e",
+            "eth.src.lg": "1",
             "eth.lg": "1",
+            "eth.src.ig": "0",
             "eth.ig": "0"
           },
           "eth.type": "0x00000800"
@@ -2539,6 +2625,7 @@
           "QUIC Connection information": {
             "quic.connection.number": "0"
           },
+          "quic.packet_length": "31",
           "quic.header_form": "0",
           "quic.fixed_bit": "1",
           "quic.spin_bit": "1",
@@ -2586,7 +2673,9 @@
             "eth.dst_resolved": "52:7c:07:b0:36:3e",
             "eth.addr": "52:7c:07:b0:36:3e",
             "eth.addr_resolved": "52:7c:07:b0:36:3e",
+            "eth.dst.lg": "1",
             "eth.lg": "1",
+            "eth.dst.ig": "0",
             "eth.ig": "0"
           },
           "eth.src": "de:ad:be:ef:12:38",
@@ -2594,7 +2683,9 @@
             "eth.src_resolved": "de:ad:be:ef:12:38",
             "eth.addr": "de:ad:be:ef:12:38",
             "eth.addr_resolved": "de:ad:be:ef:12:38",
+            "eth.src.lg": "1",
             "eth.lg": "1",
+            "eth.src.ig": "0",
             "eth.ig": "0"
           },
           "eth.type": "0x00000800"
@@ -2653,6 +2744,7 @@
           "QUIC Connection information": {
             "quic.connection.number": "0"
           },
+          "quic.packet_length": "37",
           "quic.header_form": "0",
           "quic.fixed_bit": "1",
           "quic.spin_bit": "0",
@@ -2708,7 +2800,9 @@
             "eth.dst_resolved": "de:ad:be:ef:12:38",
             "eth.addr": "de:ad:be:ef:12:38",
             "eth.addr_resolved": "de:ad:be:ef:12:38",
+            "eth.dst.lg": "1",
             "eth.lg": "1",
+            "eth.dst.ig": "0",
             "eth.ig": "0"
           },
           "eth.src": "52:7c:07:b0:36:3e",
@@ -2716,7 +2810,9 @@
             "eth.src_resolved": "52:7c:07:b0:36:3e",
             "eth.addr": "52:7c:07:b0:36:3e",
             "eth.addr_resolved": "52:7c:07:b0:36:3e",
+            "eth.src.lg": "1",
             "eth.lg": "1",
+            "eth.src.ig": "0",
             "eth.ig": "0"
           },
           "eth.type": "0x00000800"
@@ -2775,6 +2871,7 @@
           "QUIC Connection information": {
             "quic.connection.number": "0"
           },
+          "quic.packet_length": "30",
           "quic.header_form": "0",
           "quic.fixed_bit": "1",
           "quic.spin_bit": "0",

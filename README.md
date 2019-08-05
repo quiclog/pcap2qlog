@@ -72,6 +72,9 @@ node out/main.js
 
 --secrets=/path/to/secrets.keys, -s /path/to/secrets
         Path to the secrets file which has to be used to decrypt the pcap given using the --input flag
+
+--raw=(true | false), -r (true | false)
+        If set to false, raw decrypted payloads will not be logged. This is default behaviour as payloads can have a large impact on log size.
 ```
 
 NOTE: This tool can also be used to merge together multiple (partial) qlog files. To do this, just pass the files with the --list option.
