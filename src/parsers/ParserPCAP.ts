@@ -218,7 +218,8 @@ export class ParserPCAP {
 
                     //x = [] as qlog.IEventPacketRX;
 
-                    const transportEventType: TransportEventType = pcapParser.clientCID !== jsonPacket["quic.dcid"].replace(/:/g, '') ? TransportEventType.packet_sent : TransportEventType.packet_received;
+                    const dcid = jsonPacket["quic.dcid"].replace(/:/g, '');
+                    const transportEventType: TransportEventType = (pcapParser.clientCID === dcid || pcapParser.clientPermittedCIDs.has(dcid)) ? TransportEventType.packet_received : TransportEventType.packet_sent;
 
                     pcapParser.addEvent([
                         time_relative.toString(),
