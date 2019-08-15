@@ -1,6 +1,7 @@
 import {exec, execSync} from "child_process";
 import * as path from "path";
 import { getFileExtension } from "../util/FileUtil";
+const URL = require("url").URL;
 
 export class Downloader{
 
@@ -20,9 +21,47 @@ export class Downloader{
 
     } 
 
+    public static ValidateRemoteURL(url:string):string {
+
+        if( url === undefined || url === "" ){
+            throw new Error("url was empty");
+        }
+
+        let validURL = new URL(url); // throws error if not valid remote URL
+        
+        // URL ctor validator apparently doesn't work 100%, so perform some additional regex magics
+        // https://github.com/xxorax/node-shell-escape/blob/master/shell-escape.js
+        // https://github.com/ogt/valid-url/blob/master/index.js
+
+        // check invalid characters
+        if (/[^a-z0-9\:\/\?\#\|\[\]\@\!\$\&\'\(\)\*\+\,\;\=\.\-\_\~\%]/i.test(url)){
+            throw new Error("invalid character present " + url);
+        }
+
+        // check for hex escapes that aren't complete
+        if (/%[^0-9a-f]/i.test(url)) {
+            throw new Error("invalid character present " + url);
+        }
+        if (/%[0-9a-f](:?[^0-9a-f]|$)/i.test(url))  {
+            throw new Error("invalid character present " + url);
+        }
+        
+        // https://stackoverflow.com/questions/49512370/sanitize-user-input-for-child-process-exec-command
+        url = url.replace(/(["\s'$`\\])/g,'\\$1');
+
+        return url;
+    }
+
     public static DownloadAsync(inputPath:string, outputPath:string):Promise<string>{
 
         let output:Promise<string> = new Promise<string>( (resolver, rejecter) => {
+
+            try {
+            inputPath = Downloader.ValidateRemoteURL( inputPath );
+            }
+            catch(e){
+                rejecter(e.toString());
+            }
 
             let timeoutMin = 1;
             let wgetLocation:string = "wget"; 

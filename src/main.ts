@@ -99,15 +99,21 @@ async function Flow() {
         }
     }
     else{
-        let listLocalFilePath:string = await Downloader.DownloadIfRemote( input_list, tempDirectory );
-        inputListRawString = fs.readFileSync( listLocalFilePath ).toString();
-        let inputListJSON:any = JSON.parse( inputListRawString );
+        try{
+            let listLocalFilePath:string = await Downloader.DownloadIfRemote( input_list, tempDirectory );
+            inputListRawString = fs.readFileSync( listLocalFilePath ).toString();
+            let inputListJSON:any = JSON.parse( inputListRawString );
 
-        inputListDescription = inputListJSON.description ? inputListJSON.description : input_file; // default description is the file path itself
-        inputList = inputListJSON.paths;
-        for( let capt of inputList ){
-            capt.capture_original = capt.capture;
-            capt.secrets_original = capt.secrets_original;
+            inputListDescription = inputListJSON.description ? inputListJSON.description : input_file; // default description is the file path itself
+            inputList = inputListJSON.paths;
+            for( let capt of inputList ){
+                capt.capture_original = capt.capture;
+                capt.secrets_original = capt.secrets_original;
+            }
+        }
+        catch(e){
+            console.error("Error downloading list file " + e.toString());
+            process.exit(2);
         }
     }
 
