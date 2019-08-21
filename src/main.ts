@@ -92,7 +92,7 @@ async function Flow() {
             inputList.push( {capture : input_file, capture_original: input_file } );
         }
         else{
-            if( secrets_file )
+            if( secrets_file !== undefined && secrets_file !== "" )
                 inputList.push( {capture : input_file, capture_original: input_file, secrets: secrets_file, secrets_original: secrets_file } );
             else
                 inputList.push( {capture : input_file, capture_original: input_file } );
@@ -250,6 +250,8 @@ async function Flow() {
 
     for( let capt of transformFiles ){
         if( capt.qlog ){
+            combined.qlog_version = capt.qlog.qlog_version;
+
             // valid qlog found
             //if( !capt.description )
             //    capt.description = capt.capture_original; // use the filename as the description
