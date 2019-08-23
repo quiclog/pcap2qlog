@@ -13,7 +13,7 @@
                 "time_offset": "0",
                 "time_units": "ms",
                 "original_uris": [
-                    "file:///home/tom/Code/pcap2qlog/examples/draft-01/multi_stream.json"
+                    "file:///srv/pcap2qlog/examples/draft-01/multi_stream.json"
                 ]
             },
             "common_fields": {
@@ -52,7 +52,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "initial",
+                        "packet_type": "initial",
                         "header": {
                             "version": "0xff000016",
                             "scid": "8dbb8db788259711",
@@ -81,7 +81,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "initial",
+                        "packet_type": "initial",
                         "header": {
                             "version": "0xff000016",
                             "scid": "f64f4091e2956f38f12bb7d20f5f07e85557",
@@ -127,7 +127,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "handshake",
+                        "packet_type": "handshake",
                         "header": {
                             "version": "0xff000016",
                             "scid": "f64f4091e2956f38f12bb7d20f5f07e85557",
@@ -151,6 +151,7 @@
                     "168",
                     "transport",
                     "ALPN_update",
+                    "line",
                     {
                         "old": "",
                         "new": "h3-22"
@@ -162,7 +163,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "handshake",
+                        "packet_type": "handshake",
                         "header": {
                             "version": "0xff000016",
                             "scid": "f64f4091e2956f38f12bb7d20f5f07e85557",
@@ -188,7 +189,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "8dbb8db788259711",
                             "payload_length": 168,
@@ -237,7 +238,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "initial",
+                        "packet_type": "initial",
                         "header": {
                             "version": "0xff000016",
                             "scid": "8dbb8db788259711",
@@ -268,7 +269,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "handshake",
+                        "packet_type": "handshake",
                         "header": {
                             "version": "0xff000016",
                             "scid": "8dbb8db788259711",
@@ -304,7 +305,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "f64f4091e2956f38f12bb7d20f5f07e85557",
                             "payload_length": 22,
@@ -331,7 +332,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "f64f4091e2956f38f12bb7d20f5f07e85557",
                             "payload_length": 28,
@@ -365,7 +366,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "f64f4091e2956f38f12bb7d20f5f07e85557",
                             "payload_length": 99,
@@ -399,7 +400,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "f64f4091e2956f38f12bb7d20f5f07e85557",
                             "payload_length": 176,
@@ -440,7 +441,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "f64f4091e2956f38f12bb7d20f5f07e85557",
                             "payload_length": 99,
@@ -474,7 +475,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "handshake",
+                        "packet_type": "handshake",
                         "header": {
                             "version": "0xff000016",
                             "scid": "f64f4091e2956f38f12bb7d20f5f07e85557",
@@ -505,7 +506,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "8dbb8db788259711",
                             "payload_length": 502,
@@ -548,7 +549,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "f64f4091e2956f38f12bb7d20f5f07e85557",
                             "payload_length": 45,
@@ -594,7 +595,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "8dbb8db788259711",
                             "payload_length": 1242,
@@ -632,7 +633,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "8dbb8db788259711",
                             "payload_length": 1242,
@@ -656,7 +657,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "8dbb8db788259711",
                             "payload_length": 1242,
@@ -680,7 +681,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "8dbb8db788259711",
                             "payload_length": 1242,
@@ -704,7 +705,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "8dbb8db788259711",
                             "payload_length": 1242,
@@ -728,7 +729,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "8dbb8db788259711",
                             "payload_length": 608,
@@ -752,7 +753,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "8dbb8db788259711",
                             "payload_length": 1242,
@@ -780,7 +781,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "8dbb8db788259711",
                             "payload_length": 1242,
@@ -804,7 +805,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "f64f4091e2956f38f12bb7d20f5f07e85557",
                             "payload_length": 33,
@@ -840,7 +841,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "8dbb8db788259711",
                             "payload_length": 1242,
@@ -864,7 +865,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "8dbb8db788259711",
                             "payload_length": 1242,
@@ -888,7 +889,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "8dbb8db788259711",
                             "payload_length": 1242,
@@ -912,7 +913,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "8dbb8db788259711",
                             "payload_length": 233,
@@ -936,7 +937,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "8dbb8db788259711",
                             "payload_length": 21,
@@ -963,7 +964,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "f64f4091e2956f38f12bb7d20f5f07e85557",
                             "payload_length": 39,
@@ -1004,7 +1005,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "8dbb8db788259711",
                             "payload_length": 1014,
@@ -1032,7 +1033,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "f64f4091e2956f38f12bb7d20f5f07e85557",
                             "payload_length": 33,
@@ -1068,7 +1069,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "8dbb8db788259711",
                             "payload_length": 1242,
@@ -1088,6 +1089,7 @@
                             },
                             {
                                 "frame_type": "max_streams",
+                                "stream_type": "bidirectional",
                                 "maximum": "101"
                             },
                             {
@@ -1106,7 +1108,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "8dbb8db788259711",
                             "payload_length": 1242,
@@ -1130,7 +1132,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "8dbb8db788259711",
                             "payload_length": 1242,
@@ -1154,7 +1156,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "8dbb8db788259711",
                             "payload_length": 1242,
@@ -1178,7 +1180,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "8dbb8db788259711",
                             "payload_length": 1242,
@@ -1202,7 +1204,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "8dbb8db788259711",
                             "payload_length": 1242,
@@ -1226,7 +1228,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "8dbb8db788259711",
                             "payload_length": 1242,
@@ -1250,7 +1252,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "8dbb8db788259711",
                             "payload_length": 1242,
@@ -1288,7 +1290,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "8dbb8db788259711",
                             "payload_length": 1242,
@@ -1312,7 +1314,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "8dbb8db788259711",
                             "payload_length": 1242,
@@ -1336,7 +1338,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "8dbb8db788259711",
                             "payload_length": 577,
@@ -1360,7 +1362,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "f64f4091e2956f38f12bb7d20f5f07e85557",
                             "payload_length": 45,
@@ -1406,7 +1408,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "8dbb8db788259711",
                             "payload_length": 21,
@@ -1433,7 +1435,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "8dbb8db788259711",
                             "payload_length": 24,
@@ -1453,6 +1455,7 @@
                             },
                             {
                                 "frame_type": "max_streams",
+                                "stream_type": "bidirectional",
                                 "maximum": "104"
                             }
                         ]
@@ -1464,7 +1467,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "f64f4091e2956f38f12bb7d20f5f07e85557",
                             "payload_length": 22,
@@ -1491,7 +1494,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "f64f4091e2956f38f12bb7d20f5f07e85557",
                             "payload_length": 27,
@@ -1523,6 +1526,7 @@
                     "10000",
                     "connectivity",
                     "connection_close",
+                    "line",
                     {
                         "src_id": "8dbb8db788259711"
                     }

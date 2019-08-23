@@ -13,7 +13,7 @@
                 "time_offset": "0",
                 "time_units": "ms",
                 "original_uris": [
-                    "file:///home/tom/Code/pcap2qlog/examples/draft-01/ngtcp2_test.json"
+                    "file:///srv/pcap2qlog/examples/draft-01/ngtcp2_test.json"
                 ]
             },
             "common_fields": {
@@ -52,7 +52,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "initial",
+                        "packet_type": "initial",
                         "header": {
                             "version": "0xff000016",
                             "scid": "ae6eaa3840410b058a79954cfe446ff2f1",
@@ -81,7 +81,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "initial",
+                        "packet_type": "initial",
                         "header": {
                             "version": "0xff000016",
                             "scid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
@@ -127,7 +127,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "handshake",
+                        "packet_type": "handshake",
                         "header": {
                             "version": "0xff000016",
                             "scid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
@@ -151,6 +151,7 @@
                     "9",
                     "transport",
                     "ALPN_update",
+                    "line",
                     {
                         "old": "",
                         "new": "h3-22"
@@ -162,7 +163,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "handshake",
+                        "packet_type": "handshake",
                         "header": {
                             "version": "0xff000016",
                             "scid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
@@ -188,7 +189,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "handshake",
+                        "packet_type": "handshake",
                         "header": {
                             "version": "0xff000016",
                             "scid": "ae6eaa3840410b058a79954cfe446ff2f1",
@@ -224,7 +225,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 275,
@@ -297,7 +298,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 104,
@@ -342,7 +343,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 282,
@@ -415,7 +416,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "handshake",
+                        "packet_type": "handshake",
                         "header": {
                             "version": "0xff000016",
                             "scid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
@@ -446,7 +447,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 21,
@@ -473,7 +474,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 502,
@@ -516,7 +517,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 21,
@@ -543,7 +544,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -588,7 +589,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -612,7 +613,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 26,
@@ -640,7 +641,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 21,
@@ -667,7 +668,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -691,7 +692,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -715,7 +716,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 21,
@@ -742,7 +743,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -766,7 +767,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -790,7 +791,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 21,
@@ -817,7 +818,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -841,7 +842,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -865,7 +866,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 21,
@@ -892,7 +893,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -916,7 +917,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -940,7 +941,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 21,
@@ -967,7 +968,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 220,
@@ -991,7 +992,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 583,
@@ -1015,7 +1016,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 21,
@@ -1042,7 +1043,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1023,
@@ -1066,7 +1067,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -1094,7 +1095,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 21,
@@ -1121,7 +1122,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -1145,7 +1146,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -1169,7 +1170,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 21,
@@ -1196,7 +1197,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -1220,7 +1221,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -1244,7 +1245,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 21,
@@ -1271,7 +1272,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -1295,7 +1296,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -1319,7 +1320,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 21,
@@ -1346,7 +1347,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -1370,7 +1371,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -1394,7 +1395,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 21,
@@ -1421,7 +1422,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -1445,7 +1446,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -1469,7 +1470,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 21,
@@ -1496,7 +1497,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -1520,7 +1521,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 21,
@@ -1547,7 +1548,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -1571,7 +1572,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 21,
@@ -1598,7 +1599,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -1622,7 +1623,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -1646,7 +1647,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -1670,7 +1671,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 21,
@@ -1697,7 +1698,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -1721,7 +1722,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -1745,7 +1746,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 21,
@@ -1772,7 +1773,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -1796,7 +1797,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -1820,7 +1821,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 21,
@@ -1847,7 +1848,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -1871,7 +1872,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 411,
@@ -1895,7 +1896,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 21,
@@ -1922,7 +1923,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -1946,7 +1947,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -1970,7 +1971,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 21,
@@ -1997,7 +1998,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -2021,7 +2022,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 813,
@@ -2045,7 +2046,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 21,
@@ -2072,7 +2073,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -2096,7 +2097,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -2120,7 +2121,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 21,
@@ -2147,7 +2148,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -2171,7 +2172,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -2195,7 +2196,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 21,
@@ -2222,7 +2223,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -2246,7 +2247,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -2270,7 +2271,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 21,
@@ -2297,7 +2298,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -2321,7 +2322,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -2345,7 +2346,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 21,
@@ -2372,7 +2373,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -2396,7 +2397,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -2420,7 +2421,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -2444,7 +2445,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 21,
@@ -2471,7 +2472,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -2495,7 +2496,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 21,
@@ -2522,7 +2523,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -2546,7 +2547,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -2570,7 +2571,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -2594,7 +2595,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 21,
@@ -2621,7 +2622,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -2645,7 +2646,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 21,
@@ -2672,7 +2673,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -2696,7 +2697,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -2720,7 +2721,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 21,
@@ -2747,7 +2748,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -2771,7 +2772,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -2795,7 +2796,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 21,
@@ -2822,7 +2823,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -2846,7 +2847,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -2870,7 +2871,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 21,
@@ -2897,7 +2898,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -2921,7 +2922,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -2945,7 +2946,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 22,
@@ -2972,7 +2973,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -2996,7 +2997,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -3020,7 +3021,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 22,
@@ -3047,7 +3048,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -3071,7 +3072,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -3095,7 +3096,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 22,
@@ -3122,7 +3123,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -3146,7 +3147,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -3170,7 +3171,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 22,
@@ -3197,7 +3198,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -3221,7 +3222,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -3245,7 +3246,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -3272,7 +3273,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -3296,7 +3297,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -3320,7 +3321,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -3347,7 +3348,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -3371,7 +3372,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -3395,7 +3396,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -3422,7 +3423,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -3446,7 +3447,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -3470,7 +3471,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -3497,7 +3498,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -3521,7 +3522,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -3545,7 +3546,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -3572,7 +3573,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 841,
@@ -3596,7 +3597,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -3620,7 +3621,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -3647,7 +3648,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -3671,7 +3672,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -3695,7 +3696,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -3722,7 +3723,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -3746,7 +3747,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -3770,7 +3771,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -3797,7 +3798,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -3821,7 +3822,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -3845,7 +3846,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 393,
@@ -3869,7 +3870,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -3896,7 +3897,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -3920,7 +3921,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -3947,7 +3948,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -3971,7 +3972,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -3995,7 +3996,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -4022,7 +4023,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -4046,7 +4047,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -4070,7 +4071,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -4097,7 +4098,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -4121,7 +4122,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -4145,7 +4146,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -4172,7 +4173,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -4196,7 +4197,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -4220,7 +4221,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -4247,7 +4248,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -4271,7 +4272,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -4295,7 +4296,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -4322,7 +4323,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -4346,7 +4347,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -4370,7 +4371,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -4394,7 +4395,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -4421,7 +4422,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -4445,7 +4446,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -4472,7 +4473,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -4496,7 +4497,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -4520,7 +4521,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -4547,7 +4548,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -4571,7 +4572,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -4598,7 +4599,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -4622,7 +4623,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -4646,7 +4647,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -4673,7 +4674,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -4697,7 +4698,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -4721,7 +4722,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -4748,7 +4749,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -4772,7 +4773,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -4796,7 +4797,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -4823,7 +4824,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -4847,7 +4848,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -4871,7 +4872,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 29,
@@ -4903,7 +4904,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -4927,7 +4928,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -4951,7 +4952,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -4978,7 +4979,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -5002,7 +5003,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -5026,7 +5027,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -5050,7 +5051,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -5077,7 +5078,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -5101,7 +5102,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -5128,7 +5129,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -5152,7 +5153,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -5176,7 +5177,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -5203,7 +5204,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -5227,7 +5228,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -5251,7 +5252,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -5278,7 +5279,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -5302,7 +5303,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -5326,7 +5327,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -5353,7 +5354,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -5377,7 +5378,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -5401,7 +5402,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -5428,7 +5429,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -5452,7 +5453,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -5476,7 +5477,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -5503,7 +5504,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -5527,7 +5528,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -5551,7 +5552,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -5578,7 +5579,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -5602,7 +5603,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -5626,7 +5627,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -5653,7 +5654,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -5677,7 +5678,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -5701,7 +5702,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -5728,7 +5729,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -5752,7 +5753,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -5776,7 +5777,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -5803,7 +5804,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -5827,7 +5828,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -5851,7 +5852,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -5878,7 +5879,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -5902,7 +5903,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -5926,7 +5927,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -5953,7 +5954,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -5977,7 +5978,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -6001,7 +6002,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -6028,7 +6029,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -6052,7 +6053,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -6076,7 +6077,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -6103,7 +6104,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -6127,7 +6128,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -6151,7 +6152,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -6178,7 +6179,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -6202,7 +6203,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -6226,7 +6227,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -6253,7 +6254,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -6277,7 +6278,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -6301,7 +6302,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -6328,7 +6329,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -6352,7 +6353,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -6376,7 +6377,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -6403,7 +6404,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -6427,7 +6428,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -6451,7 +6452,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -6478,7 +6479,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -6502,7 +6503,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -6526,7 +6527,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -6553,7 +6554,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -6577,7 +6578,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -6601,7 +6602,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -6628,7 +6629,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -6652,7 +6653,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -6676,7 +6677,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -6703,7 +6704,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -6727,7 +6728,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -6751,7 +6752,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -6778,7 +6779,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -6802,7 +6803,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -6826,7 +6827,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -6853,7 +6854,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -6877,7 +6878,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -6901,7 +6902,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -6928,7 +6929,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -6952,7 +6953,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -6976,7 +6977,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -7003,7 +7004,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -7027,7 +7028,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 449,
@@ -7051,7 +7052,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -7078,7 +7079,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -7102,7 +7103,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -7126,7 +7127,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -7153,7 +7154,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -7177,7 +7178,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -7201,7 +7202,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -7228,7 +7229,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -7252,7 +7253,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -7276,7 +7277,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -7303,7 +7304,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -7327,7 +7328,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -7351,7 +7352,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -7378,7 +7379,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -7402,7 +7403,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -7426,7 +7427,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -7453,7 +7454,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -7477,7 +7478,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -7501,7 +7502,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -7528,7 +7529,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -7552,7 +7553,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -7576,7 +7577,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -7603,7 +7604,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 805,
@@ -7627,7 +7628,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -7651,7 +7652,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -7678,7 +7679,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -7702,7 +7703,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -7726,7 +7727,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -7753,7 +7754,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -7777,7 +7778,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -7801,7 +7802,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -7828,7 +7829,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -7852,7 +7853,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -7876,7 +7877,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -7903,7 +7904,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -7927,7 +7928,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -7951,7 +7952,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -7978,7 +7979,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -8002,7 +8003,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -8026,7 +8027,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -8053,7 +8054,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -8077,7 +8078,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -8101,7 +8102,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -8128,7 +8129,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -8152,7 +8153,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -8176,7 +8177,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -8203,7 +8204,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -8227,7 +8228,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -8251,7 +8252,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -8278,7 +8279,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -8302,7 +8303,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -8326,7 +8327,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -8353,7 +8354,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -8377,7 +8378,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -8401,7 +8402,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -8428,7 +8429,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -8452,7 +8453,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -8476,7 +8477,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -8503,7 +8504,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -8527,7 +8528,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -8551,7 +8552,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -8575,7 +8576,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -8602,7 +8603,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -8626,7 +8627,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -8653,7 +8654,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -8677,7 +8678,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -8701,7 +8702,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -8728,7 +8729,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -8752,7 +8753,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -8776,7 +8777,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -8803,7 +8804,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -8827,7 +8828,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -8851,7 +8852,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -8878,7 +8879,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -8902,7 +8903,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 544,
@@ -8926,7 +8927,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -8953,7 +8954,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -8977,7 +8978,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -9001,7 +9002,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -9025,7 +9026,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -9049,7 +9050,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -9073,7 +9074,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -9097,7 +9098,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -9121,7 +9122,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -9145,7 +9146,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -9169,7 +9170,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -9193,7 +9194,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -9217,7 +9218,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -9241,7 +9242,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 29,
@@ -9273,7 +9274,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -9297,7 +9298,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -9321,7 +9322,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -9345,7 +9346,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 670,
@@ -9369,7 +9370,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 21,
@@ -9396,7 +9397,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -9423,7 +9424,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -9447,7 +9448,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -9471,7 +9472,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -9498,7 +9499,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -9529,7 +9530,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 26,
@@ -9557,7 +9558,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 1233,
@@ -9581,7 +9582,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -9608,7 +9609,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 934,
@@ -9632,7 +9633,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 26,
@@ -9660,7 +9661,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 23,
@@ -9687,7 +9688,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 22,
@@ -9714,7 +9715,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 19,
@@ -9724,6 +9725,7 @@
                         "frames": [
                             {
                                 "frame_type": "max_streams",
+                                "stream_type": "bidirectional",
                                 "maximum": "101"
                             }
                         ]
@@ -9735,7 +9737,7 @@
                     "packet_received",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "ae6eaa3840410b058a79954cfe446ff2f1",
                             "payload_length": 22,
@@ -9762,7 +9764,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 22,
@@ -9789,7 +9791,7 @@
                     "packet_sent",
                     "line",
                     {
-                        "type": "1RTT",
+                        "packet_type": "1RTT",
                         "header": {
                             "dcid": "1ae940000d42f98a73f7bd9b4b172f4527dd",
                             "payload_length": 20,
@@ -9812,6 +9814,7 @@
                     "30080",
                     "connectivity",
                     "connection_close",
+                    "line",
                     {
                         "src_id": "ae6eaa3840410b058a79954cfe446ff2f1"
                     }
