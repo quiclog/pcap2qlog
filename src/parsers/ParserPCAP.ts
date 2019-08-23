@@ -354,6 +354,7 @@ export class ParserPCAP {
                             relativeTime,
                             EventCategory.transport,
                             TransportEventType.alpn_update,
+                            qlog.TransporEventTrigger.line,
                             {
                                 old: parser.selectedALPN,
                                 new: alpns[0],
@@ -392,6 +393,7 @@ export class ParserPCAP {
                         relativeTime,
                         EventCategory.connectivity,
                         ConnectivityEventType.connection_close,
+                        qlog.ConnectivityEventTrigger.line,
                         {
                             src_id: scid
                         } as IEventConnectionClose,
