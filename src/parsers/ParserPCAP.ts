@@ -1,6 +1,6 @@
 import * as qlog from "@quictools/qlog-schema";
 import {PCAPUtil} from "../util/PCAPUtil";
-import { VantagePointType, EventField, EventCategory, TransportEventType, QuicFrame, QUICFrameTypeName, IAckFrame, IPaddingFrame, IPingFrame, IResetStreamFrame, IStopSendingFrame, ICryptoFrame, IStreamFrame, INewTokenFrame, IUnknownFrame, IMaxStreamDataFrame, IMaxStreamsFrame, IMaxDataFrame, IDataBlockedFrame, IStreamDataBlockedFrame, IStreamsBlockedFrame, INewConnectionIDFrame, IRetireConnectionIDFrame, IPathChallengeFrame, IPathResponseFrame, IConnectionCloseFrame, ErrorSpace, TransportError, ApplicationError, ConnectivityEventType, IEventSpinBitUpdate, ConnectivityEventTrigger, IEventPacketSent, IEventConnectionClose, IALPNUpdate } from "@quictools/qlog-schema";
+import { VantagePointType, EventField, EventCategory, TransportEventType, QuicFrame, QUICFrameTypeName, IAckFrame, IPaddingFrame, IPingFrame, IResetStreamFrame, IStopSendingFrame, ICryptoFrame, IStreamFrame, INewTokenFrame, IUnknownFrame, IMaxStreamDataFrame, IMaxStreamsFrame, IMaxDataFrame, IDataBlockedFrame, IStreamDataBlockedFrame, IStreamsBlockedFrame, INewConnectionIDFrame, IRetireConnectionIDFrame, IPathChallengeFrame, IPathResponseFrame, IConnectionCloseFrame, ErrorSpace, TransportError, ApplicationError, ConnectivityEventType, IEventSpinBitUpdate, ConnectivityEventTrigger, IEventPacket, IEventPacketSent, IEventConnectionClose, IALPNUpdate } from "@quictools/qlog-schema";
 import { pathToFileURL } from "url";
 
 export class ParserPCAP {
@@ -199,9 +199,8 @@ export class ParserPCAP {
 
                     const isVersionNegotation: boolean = header.version !== undefined ? parseInt(header.version, 16) === 0x00 : false;
 
-                    // Both IEventPacketSent and IEventPacketReceived have the same structure so we just use one of the two for type checking
-                    const entry: IEventPacketSent = {
-                        type: jsonPacket['quic.header_form'] === "1" ? (isVersionNegotation ? qlog.PacketType.version_negotation : PCAPUtil.getPacketType(parseInt(jsonPacket['quic.long.packet_type']))) : qlog.PacketType.onertt,
+                    const entry: IEventPacket = {
+                        packet_type: jsonPacket['quic.header_form'] === "1" ? (isVersionNegotation ? qlog.PacketType.version_negotation : PCAPUtil.getPacketType(parseInt(jsonPacket['quic.long.packet_type']))) : qlog.PacketType.onertt,
                         header: header,
                     };
 
@@ -525,6 +524,7 @@ export class ParserPCAP {
             return {
                 frame_type: QUICFrameTypeName.max_streams,
 
+                stream_type: tsharkMaxStreamsFrame["quic.frame_type"] === "18" ? "bidirectional" : "unidirectional",
                 maximum: tsharkMaxStreamsFrame["quic.ms.max_streams"],
             };
         }
@@ -550,6 +550,7 @@ export class ParserPCAP {
             return  {
                 frame_type: QUICFrameTypeName.streams_blocked,
 
+                stream_type: tsharkStreamsBlockedFrame["quic.frame_type"] === "22" ? "bidirectional" : "unidirectional",
                 limit: tsharkStreamsBlockedFrame["quic.sib.stream_limit"],
             };
         }
