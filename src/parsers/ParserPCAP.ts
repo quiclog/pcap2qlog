@@ -1,6 +1,6 @@
 import * as qlog from "@quictools/qlog-schema";
 import {PCAPUtil} from "../util/PCAPUtil";
-import { VantagePointType, EventField, EventCategory, TransportEventType, QuicFrame, QUICFrameTypeName, IAckFrame, IPaddingFrame, IPingFrame, IResetStreamFrame, IStopSendingFrame, ICryptoFrame, IStreamFrame, INewTokenFrame, IUnknownFrame, IMaxStreamDataFrame, IMaxStreamsFrame, IMaxDataFrame, IDataBlockedFrame, IStreamDataBlockedFrame, IStreamsBlockedFrame, INewConnectionIDFrame, IRetireConnectionIDFrame, IPathChallengeFrame, IPathResponseFrame, IConnectionCloseFrame, ErrorSpace, TransportError, ApplicationError, ConnectivityEventType, IEventSpinBitUpdate, ConnectivityEventTrigger, IEventPacket, IEventPacketSent, IEventConnectionClose, IALPNUpdate } from "@quictools/qlog-schema";
+import { VantagePointType, EventField, EventCategory, TransportEventType, QuicFrame, QUICFrameTypeName, IAckFrame, IPaddingFrame, IPingFrame, IResetStreamFrame, IStopSendingFrame, ICryptoFrame, IStreamFrame, INewTokenFrame, IUnknownFrame, IMaxStreamDataFrame, IMaxStreamsFrame, IMaxDataFrame, IDataBlockedFrame, IStreamDataBlockedFrame, IStreamsBlockedFrame, INewConnectionIDFrame, IRetireConnectionIDFrame, IPathChallengeFrame, IPathResponseFrame, IConnectionCloseFrame, ErrorSpace, TransportError, ApplicationError, ConnectivityEventType, IEventSpinBitUpdated, IEventPacket, IEventPacketSent, ConnectionState, IEventTransportParametersSet, IEventConnectionStateUpdated, IDefaultEventFieldNames, CryptoError } from "@quictools/qlog-schema";
 import { pathToFileURL } from "url";
 
 export class ParserPCAP {
@@ -31,14 +31,14 @@ export class ParserPCAP {
                 title: "Connection 1",
                 description: "Connection 1 in qlog from pcap " + originalFile,
                 vantage_point: {
-                    name: "TODO",
+                    name: "pcap",
                     type: VantagePointType.network,
                     flow: VantagePointType.client, // Perspective from which the trace is made, e.g. packet_sent from flow=client means that the client has sent a packet while packet_sent from flow=server means that the server sent it.
                 },
                 configuration: {
                     time_offset: "0",
                     time_units: "ms",
-                    original_uris: [ pathToFileURL(originalFile).toString() ],
+                    original_uris: [ originalFile ],
                 },
                 common_fields: {
                     group_id: this.getConnectionID(), // Original destination connection id
@@ -46,7 +46,7 @@ export class ParserPCAP {
                     protocol_type: "QUIC",
                     reference_time: this.getStartTime().toString(),
                 },
-                event_fields: ["relative_time", "category", "event", "trigger", "data"],
+                event_fields: [IDefaultEventFieldNames.relative_time, IDefaultEventFieldNames.category, IDefaultEventFieldNames.event, IDefaultEventFieldNames.data],
                 events: []
             };
 
@@ -54,9 +54,8 @@ export class ParserPCAP {
             this.addEvent([
                 "0",
                 qlog.EventCategory.connectivity,
-                qlog.ConnectivityEventType.connection_new,
-                qlog.ConnectivityEventTrigger.line,
-                this.getConnectionInfo() as qlog.IEventConnectionNew,
+                qlog.ConnectivityEventType.connection_started,
+                this.getConnectionInfo() as qlog.IEventConnectionStarted,
             ]);
         }
 
@@ -87,12 +86,11 @@ export class ParserPCAP {
                 this.addEvent([
                     relativeTime,
                     qlog.EventCategory.connectivity,
-                    qlog.ConnectivityEventType.connection_id_update,
-                    qlog.ConnectivityEventTrigger.line,
+                    qlog.ConnectivityEventType.connection_id_updated,
                     {
                         dst_old: this.serverCID,
                         dst_new: scid,
-                    } as qlog.IEventConnectionIDUpdate,
+                    } as qlog.IEventConnectionIDUpdated,
                 ]);
                 this.serverCID = scid;
             }
@@ -106,12 +104,11 @@ export class ParserPCAP {
                 this.addEvent([ // Log the change of cid
                     relativeTime,
                     qlog.EventCategory.connectivity,
-                    qlog.ConnectivityEventType.connection_id_update,
-                    qlog.ConnectivityEventTrigger.line,
+                    qlog.ConnectivityEventType.connection_id_updated,
                     {
                         src_old: this.clientCID,
                         src_new: cid,
-                    } as qlog.IEventConnectionIDUpdate,
+                    } as qlog.IEventConnectionIDUpdated,
                 ]);
                 this.clientCID = cid;
                 this.clientPermittedCIDs.delete(cid);
@@ -122,12 +119,11 @@ export class ParserPCAP {
                 this.addEvent([
                     relativeTime,
                     qlog.EventCategory.connectivity,
-                    qlog.ConnectivityEventType.connection_id_update,
-                    qlog.ConnectivityEventTrigger.line,
+                    qlog.ConnectivityEventType.connection_id_updated,
                     {
                         dst_old: this.serverCID,
                         dst_new: cid,
-                    } as qlog.IEventConnectionIDUpdate,
+                    } as qlog.IEventConnectionIDUpdated,
                 ]);
                 this.serverCID = cid;
                 this.serverPermittedCIDs.delete(cid);
@@ -153,11 +149,10 @@ export class ParserPCAP {
                 this.addEvent([
                     relativeTime,
                     EventCategory.connectivity,
-                    ConnectivityEventType.spin_bit_update,
-                    ConnectivityEventTrigger.line,
+                    ConnectivityEventType.spin_bit_updated,
                     {
                         state: spinbitBool,
-                    } as IEventSpinBitUpdate,
+                    } as IEventSpinBitUpdated,
                 ]);
             }
         }
@@ -197,10 +192,10 @@ export class ParserPCAP {
                         header.packet_size = parseInt(jsonPacket['quic.packet_length']);
                     }
 
-                    const isVersionNegotation: boolean = header.version !== undefined ? parseInt(header.version, 16) === 0x00 : false;
+                    const isVersionNegotiation: boolean = header.version !== undefined ? parseInt(header.version, 16) === 0x00 : false;
 
                     const entry: IEventPacket = {
-                        packet_type: jsonPacket['quic.header_form'] === "1" ? (isVersionNegotation ? qlog.PacketType.version_negotation : PCAPUtil.getPacketType(parseInt(jsonPacket['quic.long.packet_type']))) : qlog.PacketType.onertt,
+                        packet_type: jsonPacket['quic.header_form'] === "1" ? (isVersionNegotiation ? qlog.PacketType.version_negotiation : PCAPUtil.getPacketType(parseInt(jsonPacket['quic.long.packet_type']))) : qlog.PacketType.onertt,
                         header: header,
                     };
 
@@ -224,7 +219,6 @@ export class ParserPCAP {
                         time_relative.toString(),
                         EventCategory.transport,
                         transportEventType,
-                        qlog.TransporEventTrigger.line,
                         entry
                     ]);
 
@@ -233,12 +227,10 @@ export class ParserPCAP {
                             pcapParser.addEvent([
                                 time_relative.toString(),
                                 EventCategory.transport,
-                                TransportEventType.version_update,
-                                qlog.TransporEventTrigger.line,
+                                TransportEventType.parameters_set,
                                 {
-                                    old: pcapParser.currentVersion,
-                                    new: header.version,
-                                } as qlog.IEventVersionUpdate
+                                    version: header.version
+                                } as qlog.IEventTransportParametersSet
                             ]);
                             pcapParser.currentVersion = header.version;
                         }
@@ -352,12 +344,11 @@ export class ParserPCAP {
                         parser.addTrailingEvent([
                             relativeTime,
                             EventCategory.transport,
-                            TransportEventType.alpn_update,
-                            qlog.TransporEventTrigger.line,
+                            TransportEventType.parameters_set,
                             {
-                                old: parser.selectedALPN,
-                                new: alpns[0],
-                            } as IALPNUpdate,
+                                owner: "remote",
+                                alpn: alpns[0],
+                            } as IEventTransportParametersSet,
                         ]);
                         parser.selectedALPN = alpns[0];
                     }
@@ -391,11 +382,10 @@ export class ParserPCAP {
                     parser.addTrailingEvent([
                         relativeTime,
                         EventCategory.connectivity,
-                        ConnectivityEventType.connection_close,
-                        qlog.ConnectivityEventTrigger.line,
+                        ConnectivityEventType.connection_state_updated,
                         {
-                            src_id: scid
-                        } as IEventConnectionClose,
+                            new: ConnectionState.closed
+                        } as IEventConnectionStateUpdated,
                     ]);
                     return this.convertConnectionCloseFrame(tsharkFrame);
                 default:
@@ -455,7 +445,7 @@ export class ParserPCAP {
             return {
                 frame_type: QUICFrameTypeName.reset_stream,
 
-                id: tsharkResetStreamFrame["quic.rsts.stream_id"],
+                stream_id: tsharkResetStreamFrame["quic.rsts.stream_id"],
                 error_code: tsharkResetStreamFrame["quic.rsts.application_error_code"],
                 final_size: tsharkResetStreamFrame["quic.rsts.final_size"],
             }
@@ -465,7 +455,7 @@ export class ParserPCAP {
             return {
                 frame_type: QUICFrameTypeName.stop_sending,
 
-                id: tsharkStopSendingFrame["quic.ss.stream_id"],
+                stream_id: tsharkStopSendingFrame["quic.ss.stream_id"],
                 error_code: tsharkStopSendingFrame["quic.ss.application_error_code"],
             };
         }
@@ -493,7 +483,7 @@ export class ParserPCAP {
             return {
                 frame_type: QUICFrameTypeName.stream,
 
-                id: tsharkStreamFrame["quic.stream.stream_id"],
+                stream_id: tsharkStreamFrame["quic.stream.stream_id"],
 
                 offset: tsharkStreamFrame['quic.frame_type_tree']['quic.stream.off'] === "1" ? tsharkStreamFrame["quic.stream.offset"] : "0",
                 length: tsharkStreamFrame["quic.stream.length"],
@@ -515,7 +505,7 @@ export class ParserPCAP {
             return {
                 frame_type: QUICFrameTypeName.max_stream_data,
 
-                id: tsharkMaxStreamDataFrame["quic.msd.stream_id"],
+                stream_id: tsharkMaxStreamDataFrame["quic.msd.stream_id"],
                 maximum: tsharkMaxStreamDataFrame["quic.msd.maximum_stream_data"],
             };
         }
@@ -541,7 +531,7 @@ export class ParserPCAP {
             return {
                 frame_type: QUICFrameTypeName.stream_data_blocked,
 
-                id: tsharkStreamDataBlockedFrame["quic.sdb.stream_id"],
+                stream_id: tsharkStreamDataBlockedFrame["quic.sdb.stream_id"],
                 limit: tsharkStreamDataBlockedFrame["quic.sb.stream_data_limit"],
             }
         }
@@ -603,7 +593,7 @@ export class ParserPCAP {
             };
         }
 
-        public static transportErrorCodeToEnum(errorCode: string): TransportError {
+        public static transportErrorCodeToEnum(errorCode: string): TransportError | string {
             const errorCodeNumber: number = parseInt(errorCode);
             if (errorCodeNumber === 0x00) {
                 return TransportError.no_error;
@@ -625,12 +615,10 @@ export class ParserPCAP {
                 return TransportError.transport_parameter_error;
             } else if (errorCodeNumber === 0x0a) {
                 return TransportError.protocol_violation;
-            } else if (errorCodeNumber === 0x0c) {
-                return TransportError.invalid_migration;
             } else if (errorCodeNumber === 0x0d) {
                 return TransportError.crypto_buffer_exceeded;
             } else if (errorCodeNumber >= 0x100 && errorCodeNumber <= 0x1ff) {
-                return TransportError.crypto_error;
+                return CryptoError.prefix + "" + errorCodeNumber;
             } else {
                 return TransportError.unknown;
             }
@@ -639,52 +627,40 @@ export class ParserPCAP {
         public static applicationErrorCodeToEnum(errorCode: string): ApplicationError {
             const errorCodeNumber: number = parseInt(errorCode);
             // FIXME Currently assumes HTTP as only application layer protocol
-            if (errorCodeNumber === 0x00) {
+            if (errorCodeNumber === 0x0100) {
                 return ApplicationError.http_no_error;
-            } else if (errorCodeNumber === 0x01) {
+            } else if (errorCodeNumber === 0x0101) {
                 return ApplicationError.http_general_protocol_error;
-            } else if (errorCodeNumber === 0x02) {
-                return ApplicationError.reserved;
-            } else if (errorCodeNumber === 0x03) {
+            } else if (errorCodeNumber === 0x0102) {
                 return ApplicationError.http_internal_error;
-            } else if (errorCodeNumber === 0x04) {
-                return ApplicationError.reserved;
-            } else if (errorCodeNumber === 0x05) {
-                return ApplicationError.http_request_cancelled;
-            } else if (errorCodeNumber === 0x06) {
-                return ApplicationError.http_incomplete_request;
-            } else if (errorCodeNumber === 0x07) {
-                return ApplicationError.http_connect_error;
-            } else if (errorCodeNumber === 0x08) {
-                return ApplicationError.http_excessive_load;
-            } else if (errorCodeNumber === 0x09) {
-                return ApplicationError.http_version_fallback;
-            } else if (errorCodeNumber === 0x0a) {
-                return ApplicationError.http_wrong_stream;
-            } else if (errorCodeNumber === 0x0b) {
-                return ApplicationError.http_id_error;
-            } else if (errorCodeNumber === 0x0c) {
-                return ApplicationError.reserved;
-            } else if (errorCodeNumber === 0x0d) {
+            } else if (errorCodeNumber === 0x0103) {
                 return ApplicationError.http_stream_creation_error;
-            } else if (errorCodeNumber === 0x0e) {
-                return ApplicationError.reserved;
-            } else if (errorCodeNumber === 0x0f) {
+            } else if (errorCodeNumber === 0x0104) {
                 return ApplicationError.http_closed_critical_stream;
-            } else if (errorCodeNumber === 0x10) {
-                return ApplicationError.reserved;
-            } else if (errorCodeNumber === 0x11) {
-                return ApplicationError.http_early_response;
-            } else if (errorCodeNumber === 0x12) {
-                return ApplicationError.http_missing_settings;
-            } else if (errorCodeNumber === 0x13) {
-                return ApplicationError.http_unexpected_frame;
-            } else if (errorCodeNumber === 0x14) {
-                return ApplicationError.http_request_rejected;
-            } else if (errorCodeNumber === 0xff) {
+            } else if (errorCodeNumber === 0x0105) {
+                return ApplicationError.http_frame_unexpected;
+            } else if (errorCodeNumber === 0x0106) {
+                return ApplicationError.http_frame_error;
+            } else if (errorCodeNumber === 0x0107) {
+                return ApplicationError.http_excessive_load;
+            } else if (errorCodeNumber === 0x0108) {
+                return ApplicationError.http_id_error;
+            } else if (errorCodeNumber === 0x0109) {
                 return ApplicationError.http_settings_error;
-            } else if (errorCodeNumber >= 0x100 && errorCodeNumber <= 0x1ff) {
-                return ApplicationError.reserved;
+            } else if (errorCodeNumber === 0x010a) {
+                return ApplicationError.http_missing_settings;
+            } else if (errorCodeNumber === 0x010b) {
+                return ApplicationError.http_request_rejected;
+            } else if (errorCodeNumber === 0x010c) {
+                return ApplicationError.http_request_cancelled;
+            } else if (errorCodeNumber === 0x010d) {
+                return ApplicationError.http_request_incomplete;
+            } else if (errorCodeNumber === 0x010e) {
+                return ApplicationError.http_early_response;
+            } else if (errorCodeNumber === 0x010f) {
+                return ApplicationError.http_connect_error;
+            } else if (errorCodeNumber === 0x0110) {
+                return ApplicationError.http_version_fallback;
             } else {
                 return ApplicationError.unknown;
             }
@@ -722,7 +698,7 @@ export class ParserPCAP {
                     ip_version: layer_ip['ipv6.version'],
                     src_ip: layer_ip['ipv6.src'],
                     dst_ip: layer_ip['ipv6.dst'],
-                    transport_protocol: "UDP",
+                    protocol: "QUIC",
                     src_port: layer_udp['udp.srcport'],
                     dst_port: layer_udp['udp.dstport'],
                     quic_version: this.getQUICVersion(),
@@ -735,7 +711,7 @@ export class ParserPCAP {
                 ip_version: layer_ip['ip.version'],
                 src_ip: layer_ip['ip.src'],
                 dst_ip: layer_ip['ip.dst'],
-                transport_protocol: "UDP",
+                protocol: "QUIC",
                 src_port: layer_udp['udp.srcport'],
                 dst_port: layer_udp['udp.dstport'],
                 quic_version: this.getQUICVersion(),
