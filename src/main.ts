@@ -220,6 +220,7 @@ async function Flow() {
             capt.qlog = await JSONToQLog.TransformToQLog( capt.capture, tempDirectory, capt.capture_original, logRawPayloads, capt.secrets );
         }
         catch(e){
+            // console.error("ERROR transforming", e);
             capt.error = e;
         }
 

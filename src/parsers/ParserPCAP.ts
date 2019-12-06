@@ -174,45 +174,80 @@ export class ParserPCAP {
                 function extractEventsFromPacket(jsonPacket:any) {
                     let header = {} as qlog.IPacketHeader;
 
-                    if (jsonPacket['quic.header_form'] == '1') // LONG header
+                    // console.log ( "-----------------------------" );
+                    // console.log ( jsonPacket );
+
+                    let jsonHeader = jsonPacket;
+                    let headerForm:"long"|"short" = "long";
+
+                    if (jsonPacket['quic.header_form'] == '1' || jsonPacket['quic.long'] ) // LONG header
                     {
-                        header.version = jsonPacket['quic.version'];
-                        header.scid = jsonPacket["quic.scid"].replace(/:/g, '');
-                        header.dcid = jsonPacket["quic.dcid"].replace(/:/g, '');
-                        header.scil = jsonPacket['quic.scil'].replace(/:/g, '');
-                        header.dcil = jsonPacket['quic.dcil'].replace(/:/g, '');
-                        header.payload_length = jsonPacket['quic.payload'].replace(/:/g, '').length / 2;
-                        header.packet_number = jsonPacket['quic.packet_number'];
+                        // at the time of writing, there are no quic.long entries in tshark's output yet
+                        // however, they switched to using quic.short below, so we're trying some defensive programming here...
+                        if ( jsonPacket['quic.long'] )
+                            jsonHeader = jsonPacket['quic.long'];
+
+                        headerForm = "long";
+
+                        header.version = jsonHeader['quic.version'];
+                        header.scid = jsonHeader["quic.scid"].replace(/:/g, '');
+                        header.dcid = jsonHeader["quic.dcid"].replace(/:/g, '');
+                        header.scil = jsonHeader['quic.scil'].replace(/:/g, '');
+                        header.dcil = jsonHeader['quic.dcil'].replace(/:/g, '');
+                        // for packets that cannot be decrypted, these fields are sometimes not present, so skip them in those cases
+                        if ( jsonHeader['quic.payload'] ){
+                            header.payload_length = jsonHeader['quic.payload'].replace(/:/g, '').length / 2;
+                        }
+                        else {
+                           header.payload_length = 0;
+                        }
+                        header.packet_number = jsonHeader['quic.packet_number'];
                         header.packet_size = parseInt(jsonPacket['quic.packet_length']);
                     }
-                    else { // SHORT
-                        header.dcid = jsonPacket['quic.dcid'].replace(/:/g, '');
-                        header.payload_length = jsonPacket['quic.protected_payload'].replace(/:/g, '').length / 2;
-                        header.packet_number = jsonPacket['quic.packet_number'];
+                    else if ( jsonPacket['quic.header_form'] == '0' || jsonPacket['quic.short'] ) { // SHORT
+
+                        if ( jsonPacket['quic.short'] )
+                            jsonHeader = jsonPacket['quic.short'];
+
+                        headerForm = "short";
+
+                        header.scid = undefined; // better safe than sorry
+                        header.dcid = jsonHeader['quic.dcid'].replace(/:/g, '');
+                        // for packets that cannot be decrypted, these fields are sometimes not present, so skip them in those cases
+                        if ( jsonHeader['quic.protected_payload'] ){
+                            header.payload_length = jsonHeader['quic.protected_payload'].replace(/:/g, '').length / 2;
+                        }
+                        else {
+                            header.payload_length = 0;
+                        }
+                        header.packet_number = jsonHeader['quic.packet_number'];
                         header.packet_size = parseInt(jsonPacket['quic.packet_length']);
+                    }
+                    else {
+                        console.error("INVALID HEADER FORM!", jsonPacket);
                     }
 
                     const isVersionNegotiation: boolean = header.version !== undefined ? parseInt(header.version, 16) === 0x00 : false;
 
                     const entry: IEventPacket = {
-                        packet_type: jsonPacket['quic.header_form'] === "1" ? (isVersionNegotiation ? qlog.PacketType.version_negotiation : PCAPUtil.getPacketType(parseInt(jsonPacket['quic.long.packet_type']))) : qlog.PacketType.onertt,
+                        packet_type: headerForm === "long" ? (isVersionNegotiation ? qlog.PacketType.version_negotiation : PCAPUtil.getPacketType(parseInt(jsonHeader['quic.long.packet_type']))) : qlog.PacketType.onertt,
                         header: header,
                     };
 
                     entry.frames = [];
+                    const dcid = jsonHeader["quic.dcid"].replace(/:/g, '');
 
                     // If there are multiple quic frames, extract data from each of them. If there is only a single frame quic.frame will be an object instead of an array
                     if (Array.isArray(jsonPacket["quic.frame"])) {
                         for (const frame of jsonPacket["quic.frame"]) {
-                            entry.frames.push(ParserPCAP.extractQlogFrame(frame, pcapParser, jsonPacket["quic.dcid"].replace(/:/g, ''), time_relative.toString(), logRawPayloads));
+                            entry.frames.push(ParserPCAP.extractQlogFrame(frame, pcapParser, dcid, time_relative.toString(), logRawPayloads));
                         }
                     } else if (jsonPacket["quic.frame"] !== undefined) {
-                        entry.frames.push(ParserPCAP.extractQlogFrame(jsonPacket["quic.frame"], pcapParser, jsonPacket["quic.dcid"].replace(/:/g, ''), time_relative.toString(), logRawPayloads));
+                        entry.frames.push(ParserPCAP.extractQlogFrame(jsonPacket["quic.frame"], pcapParser, dcid, time_relative.toString(), logRawPayloads));
                     }
 
                     //x = [] as qlog.IEventPacketRX;
 
-                    const dcid = jsonPacket["quic.dcid"].replace(/:/g, '');
                     const transportEventType: TransportEventType = (pcapParser.clientCID === dcid || pcapParser.clientPermittedCIDs.has(dcid)) ? TransportEventType.packet_received : TransportEventType.packet_sent;
 
                     pcapParser.addEvent([
@@ -222,7 +257,7 @@ export class ParserPCAP {
                         entry
                     ]);
 
-                    if (jsonPacket['quic.header_form'] === "1") {
+                    if ( headerForm === "long" ) {
                         if (header.version !== pcapParser.currentVersion && header.version !== undefined && parseInt(header.version, 16) !== 0) {
                             pcapParser.addEvent([
                                 time_relative.toString(),
@@ -234,17 +269,22 @@ export class ParserPCAP {
                             ]);
                             pcapParser.currentVersion = header.version;
                         }
-                    } else if (jsonPacket['quic.header_form'] === "0") {
-                        pcapParser.checkSpinBitUpdate(jsonPacket["quic.spin_bit"], time_relative.toString());
+                    } else if ( headerForm === "short" ) {
+                        pcapParser.checkSpinBitUpdate(jsonHeader["quic.spin_bit"], time_relative.toString());
                     }
+                    else {
+                        console.error("INVALID HEADER FORM!", jsonPacket);
+                    }
+
+                    return {scid: header.scid, dcid: header.dcid!};
                 }
 
                 // "quic" property is either an object containing the data of a single quic packet or an array containing the data of multiple quic packets coalesced into one datagram
                 if (Array.isArray(quic)) {
                     for (const packet of quic) {
-                        extractEventsFromPacket(packet);
-                        const scid: string | undefined = (packet["quic.scid"]) ? packet["quic.scid"].replace(/:/g, '') : undefined; // Short form headers don't have a scid field
-                        const dcid: string = packet["quic.dcid"].replace(/:/g, '');
+                        const {scid, dcid} = extractEventsFromPacket(packet);
+                        // const scid: string | undefined = (packet["quic.scid"]) ? packet["quic.scid"].replace(/:/g, '') : undefined; // Short form headers don't have a scid field
+                        // const dcid: string = packet["quic.dcid"].replace(/:/g, '');
 
                         if (scid !== undefined) {
                             pcapParser.checkInitialServerCIDUpdate(scid, dcid, time_relative.toString());
@@ -255,9 +295,9 @@ export class ParserPCAP {
                         pcapParser.checkCIDUpdate(dcid, time_relative.toString());
                     }
                 } else {
-                    extractEventsFromPacket(quic);
-                    const scid: string | undefined = (quic["quic.scid"]) ? quic["quic.scid"].replace(/:/g, '') : undefined;
-                    const dcid: string = quic["quic.dcid"].replace(/:/g, '');
+                    const {scid, dcid} = extractEventsFromPacket(quic);
+                    // const scid: string | undefined = (quic["quic.scid"]) ? quic["quic.scid"].replace(/:/g, '') : undefined;
+                    // const dcid: string = quic["quic.dcid"].replace(/:/g, '');
 
                     if (scid !== undefined) {
                         pcapParser.checkInitialServerCIDUpdate(scid, dcid, time_relative.toString());
@@ -283,11 +323,12 @@ export class ParserPCAP {
         private static extractALPNs(tsharkTLSHandshake: any): string[] {
             let alpnKey = undefined;
             for (const key of Object.keys(tsharkTLSHandshake)) {
-                if (key.indexOf("protocol_negotiation") >= 0) {
+                if (key.indexOf("layer_protocol_negotiation") >= 0) { // don't just check for protocol_negotation: NPN is next_protocol_negotiation...
                     alpnKey = key;
                     break;
                 }
             }
+
             if (alpnKey !== undefined) {
                 const alpnList = tsharkTLSHandshake[alpnKey]["tls.handshake.extensions_alpn_list"];
                 if (Array.isArray(alpnList)) {
@@ -295,13 +336,12 @@ export class ParserPCAP {
                         return entry["tls.handshake.extensions_alpn_str"];
                     });
                 }
-                else {
+                else if (alpnList) {
                     return [alpnList["tls.handshake.extensions_alpn_str"]];
                 }
             }
-            else {
-                return [];
-            }
+            
+            return [];
         }
 
         public static findALPNs(tsharkCryptoFrame: any): string[] {
@@ -673,6 +713,9 @@ export class ParserPCAP {
                 // Only long headers contain version
                 if (quic['quic.header_form'] === '1') {
                     return quic['quic.version'];
+                }
+                else if ( quic["quic.long"] ){
+                    return quic["quic.long"]['quic.version'];
                 }
             }
 
