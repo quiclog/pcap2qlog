@@ -18,8 +18,15 @@ export class ParserPCAP {
         public currentVersion: string;
         public selectedALPN: string = "";
 
+        private static DEFAULT_SCID = "zerolength:scid";
+        private static DEFAULT_DCID = "zerolength:dcid";
+
         constructor(private jsonTrace: any, originalFile: string) {
-            this.clientCID = jsonTrace[0]["_source"]["layers"]["quic"]["quic.scid"].replace(/:/g, ''); // Can change later
+            if ( jsonTrace[0]["_source"]["layers"]["quic"]["quic.scid"] ) // if quic.scil is 0, this field is not present!
+                this.clientCID = jsonTrace[0]["_source"]["layers"]["quic"]["quic.scid"].replace(/:/g, ''); // Can change later
+            else 
+                this.clientCID = ParserPCAP.DEFAULT_SCID;
+            
             this.serverCID = jsonTrace[0]["_source"]["layers"]["quic"]["quic.dcid"].replace(/:/g, ''); // Must change in handshake, can change later as well
             this.ODCID = this.serverCID;
             this.currentVersion = jsonTrace[0]["_source"]["layers"]["quic"]["quic.version"];
@@ -138,7 +145,8 @@ export class ParserPCAP {
             } else if (this.serverCID === dcid || this.serverPermittedCIDs.has(dcid)) {
                 this.serverPermittedCIDs.add(newCID);
             } else {
-                throw new Error("DCID of QUIC packet belongs to neither client nor server");
+                // throw new Error("DCID of QUIC packet belongs to neither client nor server " + this.serverCID + ", " + this.clientCID + " -> " + dcid + " // " + newCID );
+                // this happens with 0-length ConnectionIDs... we don't support this yet
             }
         }
 
@@ -168,14 +176,17 @@ export class ParserPCAP {
                 let frame = packet['_source']['layers']['frame'];
                 let quic = packet['_source']['layers']['quic'];
 
+                if ( !quic )
+                    continue;
+
                 let time = parseFloat(frame['frame.time_epoch']);
                 let time_relative: number = pcapParser.trace.common_fields !== undefined && pcapParser.trace.common_fields.reference_time !== undefined ? Math.round((time - parseFloat(pcapParser.trace.common_fields.reference_time)) * 1000) : -1;
 
                 function extractEventsFromPacket(jsonPacket:any) {
                     let header = {} as qlog.IPacketHeader;
 
-                    // console.log ( "-----------------------------" );
-                    // console.log ( jsonPacket );
+                     // console.log ( "-----------------------------" );
+                     // console.log ( jsonPacket );
 
                     let jsonHeader = jsonPacket;
                     let headerForm:"long"|"short" = "long";
@@ -190,8 +201,16 @@ export class ParserPCAP {
                         headerForm = "long";
 
                         header.version = jsonHeader['quic.version'];
-                        header.scid = jsonHeader["quic.scid"].replace(/:/g, '');
-                        header.dcid = jsonHeader["quic.dcid"].replace(/:/g, '');
+                        if ( jsonHeader["quic.scid"] )
+                            header.scid = jsonHeader["quic.scid"].replace(/:/g, '');
+                        else 
+                            header.scid = ParserPCAP.DEFAULT_SCID;
+
+                        if ( jsonHeader["quic.dcid"] )
+                            header.dcid = jsonHeader["quic.dcid"].replace(/:/g, '');
+                        else 
+                            header.dcid = ParserPCAP.DEFAULT_DCID;
+                        
                         header.scil = jsonHeader['quic.scil'].replace(/:/g, '');
                         header.dcil = jsonHeader['quic.dcil'].replace(/:/g, '');
                         // for packets that cannot be decrypted, these fields are sometimes not present, so skip them in those cases
@@ -212,7 +231,11 @@ export class ParserPCAP {
                         headerForm = "short";
 
                         header.scid = undefined; // better safe than sorry
-                        header.dcid = jsonHeader['quic.dcid'].replace(/:/g, '');
+                        if ( jsonHeader["quic.dcid"] )
+                            header.dcid = jsonHeader["quic.dcid"].replace(/:/g, '');
+                        else 
+                            header.dcid = ParserPCAP.DEFAULT_DCID;
+
                         // for packets that cannot be decrypted, these fields are sometimes not present, so skip them in those cases
                         if ( jsonHeader['quic.protected_payload'] ){
                             header.payload_length = jsonHeader['quic.protected_payload'].replace(/:/g, '').length / 2;
@@ -235,7 +258,7 @@ export class ParserPCAP {
                     };
 
                     entry.frames = [];
-                    const dcid = jsonHeader["quic.dcid"].replace(/:/g, '');
+                    const dcid = jsonHeader["quic.dcid"] ? jsonHeader["quic.dcid"].replace(/:/g, '') : ParserPCAP.DEFAULT_DCID;
 
                     // If there are multiple quic frames, extract data from each of them. If there is only a single frame quic.frame will be an object instead of an array
                     if (Array.isArray(jsonPacket["quic.frame"])) {
@@ -723,7 +746,10 @@ export class ParserPCAP {
         }
 
         public getConnectionID(): string {
-            return this.jsonTrace[0]['_source']['layers']['quic']['quic.scid'].replace(/:/g, '');
+            if ( this.jsonTrace[0]['_source']['layers']['quic']['quic.scid'] )
+                return this.jsonTrace[0]['_source']['layers']['quic']['quic.scid'].replace(/:/g, '');
+            else 
+                return ParserPCAP.DEFAULT_SCID;
         }
 
         public getStartTime(): number {
@@ -745,8 +771,8 @@ export class ParserPCAP {
                     src_port: layer_udp['udp.srcport'],
                     dst_port: layer_udp['udp.dstport'],
                     quic_version: this.getQUICVersion(),
-                    src_cid: layer_quic["quic.scid"].replace(/:/g, ''),
-                    dst_cid: layer_quic["quic.dcid"].replace(/:/g, ''),
+                    src_cid: this.getConnectionID(),
+                    dst_cid: layer_quic["quic.dcid"] ? layer_quic["quic.dcid"].replace(/:/g, '') : ParserPCAP.DEFAULT_DCID,
                 }
             }
 
@@ -758,8 +784,8 @@ export class ParserPCAP {
                 src_port: layer_udp['udp.srcport'],
                 dst_port: layer_udp['udp.dstport'],
                 quic_version: this.getQUICVersion(),
-                src_cid: layer_quic["quic.scid"].replace(/:/g, ''),
-                dst_cid: layer_quic["quic.dcid"].replace(/:/g, ''),
+                src_cid: this.getConnectionID(),
+                dst_cid: layer_quic["quic.dcid"] ? layer_quic["quic.dcid"].replace(/:/g, '') : ParserPCAP.DEFAULT_DCID,
             }
         }
 
