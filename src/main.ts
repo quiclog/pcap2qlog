@@ -11,6 +11,8 @@ import {PCAPToJSON} from "./flow/pcaptojson";
 import {JSONToQLog} from "./flow/jsontoqlog";
 import * as qlog from "@quictools/qlog-schema";
 import { VantagePointType, ITrace, ITraceError } from "@quictools/qlog-schema";
+import { qlogFullToQlogLookup } from "./converters/qlogFullToQlogLookup";
+import { qlogFullToQlogMinified } from "./converters/qlogFullToQlogMinified";
 
 // Parse CLI arguments
 let args = require('minimist')(process.argv.slice(2));
@@ -47,6 +49,9 @@ let output_path: string          = args.p || args.outputpath;   // output will b
 let tsharkLocation: string       = args.t || args.tshark || "/wireshark/run/tshark"; // Path to the TShark executable
 let logRawPayloads: boolean      = args.r || args.raw || false; // If set to false, raw decrypted payloads will not be logged. This is default behaviour as payloads have a huge impact on log size.
 
+let converterName: string        = args.m || args.mode || "pcap2qlog";
+let input_directory: string      = args.d || args.inputdir;
+
 if( !input_file && !input_list ){
     console.error("No input file or list of files specified, use --input or --list");
     process.exit(1);
@@ -57,7 +62,7 @@ if( !output_directory ){
     process.exit(1);
 }
 
-async function Flow() {
+async function PcapToQlogFlow() {
 
     let inputIsList:boolean = input_list !== undefined;
 
@@ -310,137 +315,91 @@ async function Flow() {
 
 };
 
-Flow().then( () => {
-    //console.log("Executing fully done");
-    process.exit(0);
-}).catch( (reason) => {
-    console.error("Top level error " + reason);
-    process.exit(3);
-});
+async function ConverterFlow(chosenConverter:string) {
+    // for now, only support reading from local disk, no downloading
 
-/*
-process.exit(2);
+    const inputFilePaths = Array<string>();
 
-
-
-// 1. figure out which kind of input file we have
-let inputExt = path.extname(input_file);
-if( inputExt == "json" ){
-    fs.readFileSync("../" + input_file).toString()
-}
-
-// Determine file extension
-let input_file_extension: string = input_file.substr(input_file.lastIndexOf('.') + 1);
-
-
-if (input_file_extension === "json") {
-    // JSON flow
-
-
-    let jsonTrace = JSON.parse(fs.readFileSync("../" + input_file).toString())
-    // I don't like this. Should make better
-    let pcapParser: ParserPCAP = new ParserPCAP(jsonTrace);
-
-    let myQLogConnection: qlog.IConnection;
-    myQLogConnection = {
-        quic_version: pcapParser.getQUICVersion(),
-        vantagepoint: qlog.VantagePoint.NETWORK,
-        connectionid: pcapParser.getConnectionID(),
-        starttime: pcapParser.getStartTime(),
-        fields: ["time", "category", "type", "trigger", "data"],
-        events: []
-    };
-
-    // First event = new connection
-    myQLogConnection.events.push([
-        0,
-        qlog.EventCategory.CONNECTIVITY,
-        qlog.ConnectivityEventType.NEW_CONNECTION,
-        qlog.ConnectivityEventTrigger.LINE,
-        pcapParser.getConnectionInfo() as qlog.IEventNewConnection
-    ]);
-
-    //TODO keys
-
-    for (let x of jsonTrace) {
-        let frame = x['_source']['layers']['frame'];
-        let quic = x['_source']['layers']['quic'];
-
-        let time = parseFloat(frame['frame.time_epoch']);
-        let time_relative: number = Math.round((time - myQLogConnection.starttime) * 1000);
-
-        let header = {} as qlog.IPacketHeader;
-
-        if (quic['quic.header_form'] == '1') // LONG header
-        {
-            header.form = 'long';
-            header.type = PCAPUtil.getPacketType(quic['quic.long.packet_type']);
-            header.version = quic['quic.version'];
-            header.scid = quic['quic.scid'].replace(/:/g, '');
-            header.dcid = quic['quic.dcid'].replace(/:/g, '');
-            header.scil = quic['quic.scil'].replace(/:/g, '');
-            header.dcil = quic['quic.dcil'].replace(/:/g, '');
-            header.payload_length = quic['quic.length'];
-            header.packet_number = quic['quic.packet_number_full'];
-        }
-        else {
-            header.form = 'short';
-            header.dcid = quic['quic.dcid'].replace(/:/g, '');
-            header.payload_length = 0; // TODO!
-            header.packet_number = quic['quic.packet_number_full'];
-        }
-
-        let entry: any = {
-            raw_encrypted: "TODO",
-            header: header,
-        };
-
-        let keys = Object.keys(quic['quic.frame']);
-        let tmp: any = {};
-        for (var j = 0; j < keys.length; j++) {
-            var key = keys[j].replace(/^quic\./, "");
-            tmp[key] = quic['quic.frame'][keys[j]];
-        }
-
-
-        tmp['frame_type'] = PCAPUtil.getFrameTypeName(tmp['frame_type']);
-
-        entry.frames = [];
-        entry.frames.push(tmp);
-
-        x = [] as qlog.IEventPacketRX;
-
-
-        myQLogConnection.events.push([
-            time_relative,
-            qlog.EventCategory.TRANSPORT,
-            qlog.TransportEventType.TRANSPORT_PACKET_RX,
-            qlog.TransporEventTrigger.LINE,
-            entry
-        ]);
+    if ( input_directory !== undefined ) {
+        // FIXME: read all files from input dir
+    } 
+    else if ( input_file ) {
+        inputFilePaths.push( input_file );
+    }
+    else {
+        console.error("ConverterFlow: no input dir or file given!");
+        return;
     }
 
-    let myQLog: qlog.IQLog;
-    myQLog = {
-        qlog_version: "0.1",
-        description: input_file,
-        connections: [myQLogConnection]
-    };
+    if ( output_directory === undefined ) {
+        console.error("ConverterFlow: no output dir or file given!");
+        return;
+    }
 
-    //TODO write to file
-    console.log(JSON.stringify(myQLog, null, 4));
+    let transform = async function(inputFilePath:string, outputDirectory:string):Promise<boolean>{
 
-    fs.writeFileSync("20181219_handshake_v6_quicker.edm.uhasselt.be.qlog", JSON.stringify(myQLog, null, 4));
+        console.log("Transforming", chosenConverter, inputFilePath );
+
+        let inputFileContents = await readFileAsync( inputFilePath );
+
+        let result:Buffer|string = "";
+
+        if ( chosenConverter === "jsonMinify" ) {
+            result = await qlogFullToQlogMinified.Convert( inputFileContents.toString(), path.basename(inputFilePath) );
+        }
+        else if ( chosenConverter === "qlogLookup" ) {
+            result = await qlogFullToQlogLookup.Convert( inputFileContents.toString(), path.basename(inputFilePath) );
+        }
+        else if ( chosenConverter === "qlogLookupUndo" ){
+            result = await qlogFullToQlogLookup.Undo( inputFileContents.toString(), path.basename(inputFilePath) );
+        }
+        else {
+            console.error( "ConverterFLow: unsupported converter mode ", chosenConverter );
+
+            return false;
+        }
+
+        mkDirByPathSync( outputDirectory );
+
+        const outputPath = outputDirectory + path.sep +  path.basename(inputFilePath, path.extname(inputFilePath) ) + "_" + chosenConverter + ".qlog";
+
+        await writeFileAsync( outputPath, result );
+
+        console.log("File written", outputPath);
+
+        return true;
+    }
+
+    let transformPromises = [];
+    for( let filePath of inputFilePaths ){
+        transformPromises.push( transform(filePath, output_directory) );
+    }
+
+    await Promise.all( transformPromises );
 }
-else if (input_file_extension === "pcap" || input_file_extension === "pcapng") {
-    // PCAP(NG) flow
-    // - encrypted PCAP?
-    // -- supply secret
-    // -> decrypted PCAP
-    // -- run tshark
-    // -- goto JSON flow
 
+
+if ( converterName === "pcap2qlog" ){
+    PcapToQlogFlow().then( () => {
+        //console.log("Executing fully done");
+        process.exit(0);
+    }).catch( (reason) => {
+        console.error("Top level error " + reason);
+        process.exit(3);
+    });
 }
+else {
 
+    // node out/main.js --mode=qlogLookup --input=/home/rmarx/WORK/binary/input/test.qlog --output=/home/rmarx/WORK/binary/output
+    // console.log("CONVERTING ", converterName, output_directory, input_file);
 
-*/
+    ConverterFlow(converterName).then( () => {
+        console.log("Executing converterflow fully done");
+        process.exit(0);
+    })
+    /*.catch( (reason) => {
+        console.error("Top level error " + reason);
+        process.exit(3);
+    });
+    */
+}
