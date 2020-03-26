@@ -1,0 +1,253 @@
+// qlog.proto
+package qlog;
+syntax = "proto3";
+
+message IQLog {
+    string qlog_version = 1 [json_name="qlog_version"];
+    string title = 2;
+    string description = 3;
+
+    repeated ITrace traces = 4; // todo: use OneOf to support | ITraceError see https://github.com/protocolbuffers/protobuf/issues/2592#issuecomment-365311139
+}
+
+
+message ITrace {
+    IVantagePoint vantage_point = 1 [json_name="vantage_point"];
+    string title = 2;
+    string description = 3;
+
+    repeated IEvent events = 4;
+}
+
+message IVantagePoint {
+    string name = 1;
+    VantagePointType type = 2;
+    VantagePointType flow = 3;
+}
+
+enum VantagePointType {
+    client = 0;
+    server = 1;
+    network = 2;
+    unknown = 3;
+}
+
+message IEvent {
+    uint32 timestamp = 0;
+    Category category = 1;
+    EventType type = 2;
+
+    // field names have to be the same as the type field so we can revert them to proper qlog afterwards
+    // (in qlog, the field is just called "data" for all events, but that's not possible in protobufs apparently)
+    oneof data {
+        IEventDatagramsSent datagrams_sent = 3;
+        IEventDatagramsReceived datagrams_received = 4;
+        IEventPacketSent packet_sent = 5;
+        IEventPacketReceived packet_received = 6;
+
+        IEventH3FrameCreated frame_created = 7;
+        IEventH3FrameParsed frame_parsed = 8;
+        IEventH3DataMoved data_moved = 9;
+    }
+}
+
+enum Category {
+    transport = 0;
+    http = 1;
+}
+
+enum EventType {
+    datagramsSent = 0;
+    datagramsReceived = 1;
+    packetSent = 2;
+    packetReceived = 3;
+
+    frameCreated = 4;
+    frameParsed = 5;
+    dataMoved = 6;
+}
+
+message IEventDatagramsSent {
+    uint32 count = 0;
+    uint32 byte_length = 1;
+}
+
+message IEventDatagramsReceived {
+    uint32 count = 0;
+    uint32 byte_length = 1;
+}
+
+message IEventPacketReceived {
+    PacketType packet_type = 0;
+    IPacketHeader header = 1;
+
+    repeated QuicFrame frames = 2;
+
+    bool is_coalesced = 3;
+    bytes raw_encrypted = 4;
+    bytes raw_decrypted = 5;
+}
+
+message IEventPacketSent {
+    PacketType packet_type = 0;
+    IPacketHeader header = 1;
+
+    repeated QuicFrame frames = 2;
+
+    bool is_coalesced = 3;
+    bytes raw_encrypted = 4;
+    bytes raw_decrypted = 5;
+}
+
+enum PacketType {
+    initial = 0;
+    handshake = 1;
+    zeroRTT = 2;  // protobuf.js doesn't support _ in enum names nor starting with a number APPARENTLY
+    oneRTT = 3; // protobuf.js doesn't support _ in enum names nor starting with a number APPARENTLY
+    retry = 4;
+    versionnegotiation = 5; // protobuf.js doesn't support _ in enum names APPARENTLY
+}
+
+message IPacketHeader {
+    uint64 packet_number = 0;
+    uint32 packet_size = 1;
+    uint32 payload_length = 2;
+
+    string version = 3;
+    string scil = 4;
+    string dcil = 5;
+    string scid = 6;
+    string dcid = 7;
+}
+
+// put everything into 1 big definition because protobuf doesn't have a union type...
+// the indexation numbers take up progressively more bytes though, so prioritize numbers < 15 for frequent frames like ACK and STREAM
+message QuicFrame {
+    QuicFrameType frame_type = 0; 
+
+    // ACK frame
+    int32 ack_delay = 1;
+    repeated AckRange acked_ranges = 2;
+
+    // Stream frame
+    uint64 stream_id = 3;
+    uint64 offset = 4;
+    uint32 length = 5;
+
+    bool fin = 6;
+
+    uint32 error_code = 7;
+
+    uint64 maximum = 8;
+    uint64 limit = 9;
+
+    StreamType stream_type = 10;
+
+    uint64 sequence_number = 11;
+    uint64 retire_prior_to = 12;
+    string connection_id = 13;
+    bytes reset_token = 14;
+
+    bytes data = 15;
+
+    ErrorSpace error_space = 16;
+    uint32 raw_error_code = 17;
+    string reason = 18;
+    uint64 trigger_frame_type = 19;
+
+    uint64 raw_frame_type = 20;
+
+    string token = 21;
+
+    // ACK frame (infrequent fields)
+    string ect1 = 22;
+    string ect0 = 23;
+    string ce = 24;
+
+    // STREAM frame 
+    bytes raw = 25;
+}
+
+message AckRange {
+    repeated int64 range = 0 [packed=true]; // packed prevents header per entry 
+}
+
+enum StreamType {
+    bidirectional = 0;
+    unidirectional = 1;
+}
+
+enum ErrorSpace {
+    transport_error = 0;
+    application_error = 1;
+}
+
+enum QuicFrameType {
+    padding = 0;
+    ping = 1;
+    ack = 2;
+    resetStream = 3;
+    stopSending = 4;
+    crypto = 5;
+    newToken = 6;
+    stream = 7;
+    maxData = 8;
+    maxStreamData = 9;
+    maxStreams = 10;
+    dataBlocked = 11;
+    streamDataBlocked = 12;
+    streamsBlocked = 13;
+    newConnectionId = 14;
+    retireConnectionId = 15;
+    pathChallenge = 16;
+    pathResponse = 17;
+    connectionClose = 18;
+    applicationClose = 19;
+    unknownFrameType = 20;
+}
+
+message IEventH3FrameCreated {
+    uint64 stream_id = 0;
+    HTTP3Frame frame = 1;
+    uint32 byte_length = 2;
+
+    bytes raw = 3;
+}
+
+message IEventH3FrameParsed {
+    uint64 stream_id = 0;
+    HTTP3Frame frame = 1;
+    uint32 byte_length = 2;
+
+    bytes raw = 3;
+}
+
+message IEventH3DataMoved {
+    uint64 stream_id = 0;
+    uint64 offset = 1;
+    uint32 length = 2;
+
+    MoveDirection from = 3;
+    MoveDirection to = 4;
+
+    bytes raw = 5;
+}
+
+message HTTP3Frame {
+    H3FrameType frame_type = 0;
+}
+
+enum H3FrameType {
+    data = 0;
+    control = 1;
+    push = 2;
+    reservedType = 3; // TODO: in normal qlog, this is reserved, but that's a restricted keyword in protobuf...
+    qpackEncode = 4;
+    qpackDecode = 5;
+}
+
+enum MoveDirection {
+    application = 0;
+    transport = 1;
+}
+

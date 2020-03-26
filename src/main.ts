@@ -13,6 +13,7 @@ import * as qlog from "@quictools/qlog-schema";
 import { VantagePointType, ITrace, ITraceError } from "@quictools/qlog-schema";
 import { qlogFullToQlogLookup } from "./converters/qlogFullToQlogLookup";
 import { qlogFullToQlogMinified } from "./converters/qlogFullToQlogMinified";
+import { qlogFullToQlogProtobuf } from "./converters/qlogFullToProtobuf";
 
 // Parse CLI arguments
 let args = require('minimist')(process.argv.slice(2));
@@ -343,15 +344,21 @@ async function ConverterFlow(chosenConverter:string) {
         let inputFileContents = await readFileAsync( inputFilePath );
 
         let result:Buffer|string = "";
+        let outputExtension:string = ".qlog";
 
         if ( chosenConverter === "jsonMinify" ) {
             result = await qlogFullToQlogMinified.Convert( inputFileContents.toString(), path.basename(inputFilePath) );
+            outputExtension = path.extname(inputFilePath);
         }
         else if ( chosenConverter === "qlogLookup" ) {
             result = await qlogFullToQlogLookup.Convert( inputFileContents.toString(), path.basename(inputFilePath) );
         }
         else if ( chosenConverter === "qlogLookupUndo" ){
             result = await qlogFullToQlogLookup.Undo( inputFileContents.toString(), path.basename(inputFilePath) );
+        }
+        else if ( chosenConverter === "qlogProtobuf" ){
+            result = await qlogFullToQlogProtobuf.Convert( inputFileContents.toString(), path.basename(inputFilePath) );
+            outputExtension = ".protobuf";
         }
         else {
             console.error( "ConverterFLow: unsupported converter mode ", chosenConverter );
@@ -361,7 +368,7 @@ async function ConverterFlow(chosenConverter:string) {
 
         mkDirByPathSync( outputDirectory );
 
-        const outputPath = outputDirectory + path.sep +  path.basename(inputFilePath, path.extname(inputFilePath) ) + "_" + chosenConverter + ".qlog";
+        const outputPath = outputDirectory + path.sep +  path.basename(inputFilePath, path.extname(inputFilePath) ) + "_" + chosenConverter + outputExtension;
 
         await writeFileAsync( outputPath, result );
 
