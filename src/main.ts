@@ -345,6 +345,7 @@ async function ConverterFlow(chosenConverter:string) {
 
         let result:Buffer|string = "";
         let outputExtension:string = ".qlog";
+        let writeFile = true;
 
         if ( chosenConverter === "jsonMinify" ) {
             result = await qlogFullToQlogMinified.Convert( inputFileContents.toString(), path.basename(inputFilePath) );
@@ -360,19 +361,38 @@ async function ConverterFlow(chosenConverter:string) {
             result = await qlogFullToQlogProtobuf.Convert( inputFileContents.toString(), path.basename(inputFilePath) );
             outputExtension = ".protobuf";
         }
+        else if ( chosenConverter === "qlogProtobufUndo" ){
+            result = await qlogFullToQlogProtobuf.Undo( inputFileContents, path.basename(inputFilePath) );
+            outputExtension = ".qlog";
+        }
+        else if ( chosenConverter === "validateProtobuf" ) {
+            writeFile = false;
+
+            // first encode, then directly decode and compare to the original to see if we get the exact same thing
+            const inputString = inputFileContents.toString();
+            result = await qlogFullToQlogProtobuf.Convert( inputString, path.basename(inputFilePath) );
+
+            const equality = await qlogFullToQlogProtobuf.Compare( inputString, result );
+
+            if ( !equality ) {
+                console.error("qlogFullToProtobuf: ERROR: decoding went wrong! Outputs were non-equal!");
+            }
+        }
         else {
-            console.error( "ConverterFLow: unsupported converter mode ", chosenConverter );
+            console.error( "ConverterFlow: unsupported converter mode ", chosenConverter );
 
             return false;
         }
 
-        mkDirByPathSync( outputDirectory );
+        if ( writeFile ) {
+            mkDirByPathSync( outputDirectory );
 
-        const outputPath = outputDirectory + path.sep +  path.basename(inputFilePath, path.extname(inputFilePath) ) + "_" + chosenConverter + outputExtension;
+            const outputPath = outputDirectory + path.sep +  path.basename(inputFilePath, path.extname(inputFilePath) ) + "_" + chosenConverter + outputExtension;
 
-        await writeFileAsync( outputPath, result );
+            await writeFileAsync( outputPath, result );
 
-        console.log("File written", outputPath);
+            console.log("File written", outputPath);
+        }
 
         return true;
     }
@@ -398,6 +418,9 @@ if ( converterName === "pcap2qlog" ){
 else {
 
     // node out/main.js --mode=qlogLookup --input=/home/rmarx/WORK/binary/input/test.qlog --output=/home/rmarx/WORK/binary/output
+    // node out/main.js --mode=qlogProtobuf --input=/home/rmarx/WORK/binary/input/big.qlog --output=/home/rmarx/WORK/binary/output
+    // node out/main.js --mode=validateProtobuf --input=/home/rmarx/WORK/binary/input/large.qlog --output=/home/rmarx/WORK/binary/output
+    // node out/main.js --mode=qlogProtobufUndo --input=/home/rmarx/WORK/binary/output/large_qlogProtobuf.protobuf --output=/home/rmarx/WORK/binary/output
     // console.log("CONVERTING ", converterName, output_directory, input_file);
 
     ConverterFlow(converterName).then( () => {

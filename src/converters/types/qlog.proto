@@ -12,11 +12,30 @@ message IQLog {
 
 
 message ITrace {
-    IVantagePoint vantage_point = 1 [json_name="vantage_point"];
     string title = 2;
     string description = 3;
 
-    repeated IEvent events = 4;
+    IConfiguration configuration = 4;
+    ICommonFields common_fields = 5;
+    repeated string event_fields = 6;
+
+    repeated IEvent events = 7;
+
+    IVantagePoint vantage_point = 8 [json_name="vantage_point"]; // should be at 0, but aioquic logs this at the bottom, and this makes it easier for us to do automated checks after deserializing protobufs
+}
+
+message IConfiguration {
+    string time_units = 0;
+    string time_offset = 1;
+    
+    repeated string original_uris = 2;
+}
+
+message ICommonFields{
+    string group_id = 0;
+    string protocol_type = 1;
+    string ODCID = 2;
+    string reference_time = 3; // TODO: should really be uint32 
 }
 
 message IVantagePoint {
@@ -48,12 +67,20 @@ message IEvent {
         IEventH3FrameCreated frame_created = 7;
         IEventH3FrameParsed frame_parsed = 8;
         IEventH3DataMoved data_moved = 9;
+
+        IEventSpinBitUpdated spin_bit_updated = 10;
+        IEventMetricsUpdated metrics_updated = 11;
+
+        IEventParametersSet parameters_set = 12; // TODO: figure out how to do this with the http and recovery parameters_set events... cannot have the same name, DERP // probably best to include category here as well then
+        IEventPacketDropped packet_dropped = 13;
     }
 }
 
 enum Category {
     transport = 0;
     http = 1;
+    connectivity = 2;
+    recovery = 3;
 }
 
 enum EventType {
@@ -65,6 +92,12 @@ enum EventType {
     frameCreated = 4;
     frameParsed = 5;
     dataMoved = 6;
+
+    spinBitUpdated = 7;
+    metricsUpdated = 8;
+
+    parametersSet = 9;
+    packetDropped = 10;
 }
 
 message IEventDatagramsSent {
@@ -86,6 +119,8 @@ message IEventPacketReceived {
     bool is_coalesced = 3;
     bytes raw_encrypted = 4;
     bytes raw_decrypted = 5;
+
+    string trigger = 6;
 }
 
 message IEventPacketSent {
@@ -97,13 +132,94 @@ message IEventPacketSent {
     bool is_coalesced = 3;
     bytes raw_encrypted = 4;
     bytes raw_decrypted = 5;
+
+    string trigger = 6;
 }
+
+message IEventPacketDropped {
+    PacketType packet_type = 0;
+    uint32 packet_size = 1;
+
+    bytes raw = 2;
+
+    string trigger = 3;
+}
+
+message IEventSpinBitUpdated {
+    bool state = 0;
+}
+
+message IEventMetricsUpdated {
+    uint32 bytes_in_flight = 0;
+    uint32 cwnd = 1;
+    uint32 latest_rtt = 2;
+    uint32 min_rtt = 3;
+    uint32 smoothed_rtt = 4;
+    uint32 rtt_variance = 5;
+
+    uint32 max_ack_delay = 6;
+    uint32 pro_count = 7;
+
+    uint32 congestion_window = 8;
+    uint32 ssthresh = 9;
+
+    uint32 packets_in_flight = 10;
+    bool in_recovery = 11;
+    uint32 pacing_rate = 12;
+
+    string trigger = 13;
+}
+
+message IEventParametersSet {
+    string owner = 0; // TODO make enum "local" | "remote"
+
+    bool resumption_allowed = 1;
+    bool early_data_enabled = 2;
+    string alpn = 3;
+    string version = 4;
+    string tls_cipher = 5;
+
+    string original_connection_id = 6;
+    string stateless_reset_token = 7;
+    bool disable_active_migration = 8;
+
+    uint32 idle_timeout = 9;
+    uint32 max_packet_size = 10;
+    uint32 ack_delay_exponent = 11;
+    uint32 max_ack_delay = 12;
+    uint32 active_connection_id_limit = 13;
+
+    uint64 initial_max_data = 14;
+    uint64 initial_max_stream_data_bidi_local = 15;
+    uint64 initial_max_stream_data_bidi_remote = 16;
+    uint64 initial_max_stream_data_uni = 17;
+    uint64 initial_max_streams_bidi = 18;
+    uint64 initial_max_streams_uni = 19;
+
+    IPreferredAddress preferred_address = 20;
+
+    uint32 max_datagram_frame_size = 21; // DATAGRAM extension 
+
+    string trigger = 22;
+}
+
+message IPreferredAddress {
+    string ip_v4 = 0;
+    string ip_v6 = 1;
+    
+    string port_v4 = 2;
+    string port_v6 = 3;
+
+    string connection_id = 4;
+    string stateless_reset_token = 5;
+}
+
 
 enum PacketType {
     initial = 0;
     handshake = 1;
-    zeroRTT = 2;  // protobuf.js doesn't support _ in enum names nor starting with a number APPARENTLY
-    oneRTT = 3; // protobuf.js doesn't support _ in enum names nor starting with a number APPARENTLY
+    zerortt = 2;  // protobuf.js doesn't support _ in enum names nor starting with a number APPARENTLY
+    onertt = 3; // protobuf.js doesn't support _ in enum names nor starting with a number APPARENTLY
     retry = 4;
     versionnegotiation = 5; // protobuf.js doesn't support _ in enum names APPARENTLY
 }
@@ -204,6 +320,7 @@ enum QuicFrameType {
     connectionClose = 18;
     applicationClose = 19;
     unknownFrameType = 20;
+    handshakeDone = 21;
 }
 
 message IEventH3FrameCreated {
@@ -231,19 +348,33 @@ message IEventH3DataMoved {
     MoveDirection to = 4;
 
     bytes raw = 5;
+
+    string trigger = 6;
 }
 
 message HTTP3Frame {
     H3FrameType frame_type = 0;
+
+    repeated IHTTPHeader headers = 1;
+    repeated IHTTPSetting settings = 2;
+
+    uint64 stream_id = 3;
+    uint64 push_id = 4;
+
+    bytes raw = 5;
 }
 
 enum H3FrameType {
     data = 0;
-    control = 1;
-    push = 2;
-    reservedType = 3; // TODO: in normal qlog, this is reserved, but that's a restricted keyword in protobuf...
-    qpackEncode = 4;
-    qpackDecode = 5;
+    headers = 1;
+    cancel_push = 2;
+    settings = 3;
+    push_promise = 4;
+    goaway = 5;
+    max_push_id = 6;
+    duplicate_push = 7;
+    reservedType = 8; // TODO: in normal qlog, this is reserved, but that's a restricted keyword in protobuf...
+    unknown = 9;
 }
 
 enum MoveDirection {
@@ -251,3 +382,12 @@ enum MoveDirection {
     transport = 1;
 }
 
+message IHTTPHeader {
+    string name = 0;
+    string value = 1;
+}
+
+message IHTTPSetting {
+    string name = 0;
+    string value = 1;
+}
