@@ -5,6 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "@quictools/qlog-schema": ">=0.0.16",
+    "cbor": "^5.0.1",
     "minimist": "^1.2.0",
     "protobufjs": "^6.8.9"
   },

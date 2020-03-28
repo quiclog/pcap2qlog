@@ -14,6 +14,7 @@ import { VantagePointType, ITrace, ITraceError } from "@quictools/qlog-schema";
 import { qlogFullToQlogLookup } from "./converters/qlogFullToQlogLookup";
 import { qlogFullToQlogMinified } from "./converters/qlogFullToQlogMinified";
 import { qlogFullToQlogProtobuf } from "./converters/qlogFullToProtobuf";
+import { qlogFullToQlogCbor } from "./converters/qlogFullToQlogCbor";
 
 // Parse CLI arguments
 let args = require('minimist')(process.argv.slice(2));
@@ -363,7 +364,6 @@ async function ConverterFlow(chosenConverter:string) {
         }
         else if ( chosenConverter === "qlogProtobufUndo" ){
             result = await qlogFullToQlogProtobuf.Undo( inputFileContents, path.basename(inputFilePath) );
-            outputExtension = ".qlog";
         }
         else if ( chosenConverter === "validateProtobuf" ) {
             writeFile = false;
@@ -376,6 +376,26 @@ async function ConverterFlow(chosenConverter:string) {
 
             if ( !equality ) {
                 console.error("qlogFullToProtobuf: ERROR: decoding went wrong! Outputs were non-equal!");
+            }
+        }
+        else if ( chosenConverter === "qlogCbor" ) {
+            result = await qlogFullToQlogCbor.Convert( inputFileContents.toString(), path.basename(inputFilePath) );
+            outputExtension = ".cbor";
+        }
+        else if ( chosenConverter === "qlogCborUndo" ) {
+            result = await qlogFullToQlogCbor.Undo( inputFileContents, path.basename(inputFilePath) );
+        }
+        else if ( chosenConverter === "validateCbor" ) {
+            writeFile = false;
+
+            // first encode, then directly decode and compare to the original to see if we get the exact same thing
+            const inputString = inputFileContents.toString();
+            result = await qlogFullToQlogCbor.Convert( inputString, path.basename(inputFilePath) );
+
+            const equality = await qlogFullToQlogCbor.Compare( inputString, result );
+
+            if ( !equality ) {
+                console.error("qlogFullToQlogCbor: ERROR: decoding went wrong! Outputs were non-equal!");
             }
         }
         else {
@@ -421,6 +441,7 @@ else {
     // node out/main.js --mode=qlogProtobuf --input=/home/rmarx/WORK/binary/input/big.qlog --output=/home/rmarx/WORK/binary/output
     // node out/main.js --mode=validateProtobuf --input=/home/rmarx/WORK/binary/input/large.qlog --output=/home/rmarx/WORK/binary/output
     // node out/main.js --mode=qlogProtobufUndo --input=/home/rmarx/WORK/binary/output/large_qlogProtobuf.protobuf --output=/home/rmarx/WORK/binary/output
+    // node out/main.js --mode=validateCbor --input=/home/rmarx/WORK/binary/input/big.qlog --output=/home/rmarx/WORK/binary/output
     // console.log("CONVERTING ", converterName, output_directory, input_file);
 
     ConverterFlow(converterName).then( () => {

@@ -1,0 +1,1 @@
+declare module "cbor"; // because TypeScript cannot figure this out for itself... DX indeed
