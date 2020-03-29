@@ -1,0 +1,21 @@
+FROM ubuntu:19.04
+MAINTAINER Robin Marx <robin.marx@uhasselt.be>
+
+# extra repo needed for brotli, see linuxhelp.com/how-to-install-brotli-on-ubuntu-17-04
+RUN 						\
+	add-apt-repository ppa:eugenesan/ppa \ 
+    && apt-get update 		\
+	&& apt-get upgrade -y 	\
+	&& apt-get install -y curl \
+    && curl -sL https://deb.nodesource.com/setup_10.x | bash - \
+    && apt-get install -y nodejs git-core nano liblz4-tool zstd brotli \
+    && apt-get autoremove 	\
+    && apt-get clean		\
+	&& rm -rf /var/lib/apt/lists/*
+	
+RUN git clone --single-branch --branch binary --depth 1 https://github.com/quiclog/pcap2qlog.git /srv/pcap2qlog \
+  && cd /srv/pcap2qlog \
+  && npm install \
+  && node_modules/typescript/bin/tsc -p .
+
+ENTRYPOINT ["bash"]
