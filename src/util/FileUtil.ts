@@ -12,10 +12,12 @@ export function mkDirByPathSync(targetDir:string, {isRelativeToScript = false} =
   targetDir.split(sep).reduce((parentDir, childDir) => {
     const curDir = path.resolve(baseDir, parentDir, childDir);
     try {
-      fs.mkdirSync(curDir);
+      if (!fs.existsSync(curDir)) {
+        fs.mkdirSync(curDir);
+      }
       //console.log(`Directory ${curDir} created!`);
     } catch (err) {
-      if (err.code !== 'EEXIST' && 
+      if (err.code !== 'EEXIST' && err.code !== "EISDIR" &&
           !(err.code == 'EPERM' && curDir == "C:\\") ) {
         throw err;
       }
