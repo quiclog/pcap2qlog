@@ -1,42 +1,277 @@
 import * as qlog from "@quictools/qlog-schema";
 import {PCAPUtil} from "../util/PCAPUtil";
-import { VantagePointType, EventField, EventCategory, TransportEventType, QuicFrame, QUICFrameTypeName, IAckFrame, IPaddingFrame, IPingFrame, IResetStreamFrame, IStopSendingFrame, ICryptoFrame, IStreamFrame, INewTokenFrame, IUnknownFrame, IMaxStreamDataFrame, IMaxStreamsFrame, IMaxDataFrame, IDataBlockedFrame, IStreamDataBlockedFrame, IStreamsBlockedFrame, INewConnectionIDFrame, IRetireConnectionIDFrame, IPathChallengeFrame, IPathResponseFrame, IConnectionCloseFrame, ErrorSpace, TransportError, ApplicationError, ConnectivityEventType, IEventSpinBitUpdated, IEventPacket, IEventPacketSent, ConnectionState, IEventTransportParametersSet, IEventConnectionStateUpdated, IDefaultEventFieldNames, CryptoError } from "@quictools/qlog-schema";
+import { VantagePointType, EventField, EventCategory, TransportEventType, QuicFrame, QUICFrameTypeName, IAckFrame, IPaddingFrame, IPingFrame, IResetStreamFrame, IStopSendingFrame, ICryptoFrame, IStreamFrame, INewTokenFrame, IUnknownFrame, IMaxStreamDataFrame, IMaxStreamsFrame, IMaxDataFrame, IDataBlockedFrame, IStreamDataBlockedFrame, IStreamsBlockedFrame, INewConnectionIDFrame, IRetireConnectionIDFrame, IPathChallengeFrame, IPathResponseFrame, IConnectionCloseFrame, ErrorSpace, TransportError, ApplicationError, ConnectivityEventType, IEventSpinBitUpdated, IEventPacket, IEventPacketSent, ConnectionState, IEventTransportParametersSet, IEventConnectionStateUpdated, IDefaultEventFieldNames, CryptoError, PacketType } from "@quictools/qlog-schema";
 import { pathToFileURL } from "url";
 
+interface TraceWrapper {
+    qlogTrace:qlog.ITrace,
+
+    referenceTime:number,
+    currentTime:number,
+    trailingEvents: EventField[][],
+
+    currentClientCID:string|undefined, // DCID the server will use to send to the client
+    currentServerCID:string|undefined, // DCID the client will use to send to the server
+
+    clientIssuedCIDs:Array<string>,
+    serverIssuedCIDs:Array<string>,
+
+    spinbit:boolean,
+
+    currentVersion: string,
+    selectedALPN: string|undefined
+}
+
 export class ParserPCAP {
-        public clientCID: string;
+        public clientCID: string|undefined = ParserPCAP.DEFAULT_SCID;
         public clientPermittedCIDs: Set<string> = new Set<string>(); // New connection ids the client is permitted to use, communicated using NEW_CONNECTION_ID frames from server to client
-        public serverCID: string;
+        public serverCID: string|undefined = ParserPCAP.DEFAULT_SCID;
         public serverPermittedCIDs: Set<string> = new Set<string>(); // New connection ids the server is permitted to use, communicated using NEW_CONNECTION_ID frames from client to server
-        public ODCID: string; // Original destination conn id
+        public ODCID: string|undefined = "ODCID_DEFAULT"; // Original destination conn id
         public serverCIDChanged: boolean = false;; // Flip after initial change
 
-        public trace: qlog.ITrace;
-        private trailingEvents: EventField[][] = [];
+        protected traceMap:Map<string, TraceWrapper> = new Map<string, TraceWrapper>(); // maps ODCIDs to a trace
+        protected CIDToODCIDMap:Map<string, string> = new Map<string, string>(); // maps actual CIDs to an ODCID (to be used to lookup the trace)
 
-        public spinbit: boolean = false;
-        public currentVersion: string;
-        public selectedALPN: string = "";
+        protected jsonRoot:any = undefined;
+        protected originalFileURI:string = "";
+        protected debugging:boolean = false;
 
         private static DEFAULT_SCID = "zerolength:scid";
         private static DEFAULT_DCID = "zerolength:dcid";
 
-        constructor(private jsonTrace: any, originalFile: string) {
-            if ( jsonTrace[0]["_source"]["layers"]["quic"]["quic.scid"] ) // if quic.scil is 0, this field is not present!
-                this.clientCID = jsonTrace[0]["_source"]["layers"]["quic"]["quic.scid"].replace(/:/g, ''); // Can change later
-            else 
-                this.clientCID = ParserPCAP.DEFAULT_SCID;
+        public static Parse(jsonContents:any, originalFile: string, logRawPayloads: boolean, secretsContents:any):qlog.IQLog {
             
-            this.serverCID = jsonTrace[0]["_source"]["layers"]["quic"]["quic.dcid"].replace(/:/g, ''); // Must change in handshake, can change later as well
-            this.ODCID = this.serverCID;
-            this.currentVersion = jsonTrace[0]["_source"]["layers"]["quic"]["quic.version"];
+            let debugging:boolean = process.env.PCAPDEBUG !== undefined; // run: sudo PCAPDEBUG=true node out/main.js ...   (TODO: make this proper, app-wide instead of checking env directly here, which is dirty)
 
-            // FIXME: we assume now that each input file only contains a single QUIC connection
-            // in reality, they could potentially contain more, so we should support that in the future!
-            // Or at least check for it... there is a "connectionNr" field in there somewhere
-            this.trace = {
-                title: "Connection 1",
-                description: "Connection 1 in qlog from pcap " + originalFile,
+            try {
+                let pcapParser = new ParserPCAP( jsonContents, originalFile, debugging );
+
+                return pcapParser.parse();
+            }
+            catch(e) {
+                if ( debugging ) {
+                    console.log("ParserPCAP: Error occured", e);
+                }
+
+                throw e;
+            }
+        }
+
+        constructor(private jsonTrace: any, originalFile: string, debugging: boolean = false) {
+            this.debugging = debugging;
+            this.jsonRoot = jsonTrace;
+            this.originalFileURI = originalFile;
+        }
+
+
+        private parse():qlog.IQLog {
+
+            let output: qlog.IQLog;
+
+            let debug_totalPacketcount: number = 0;
+            let debug_totalQuicPacketcount: number = 0;
+            
+            // 1. loop over all packets
+            // 2. if you find a QUIC packet
+            //      2.1 parse its header
+            //      2.2 find its trace and create a new trace if it didn't exist yet
+            //      2.3 check if global state is updated (e.g., spinbit, version, etc.)
+            //      2.4 parse packet frame contents
+            //      2.5 add it to the trace
+
+            // 1.
+            let debug_packetCount = 0;
+            for ( const rawEntry of this.jsonRoot ) {
+                ++debug_totalPacketcount;
+
+                if ( !PCAPUtil.ensurePathExists("_source/layers/quic", rawEntry, false) ) {
+                    continue;
+                }
+
+                // 2.
+                // entry can contain 1 or more QUIC packets (e.g., coalescing)
+                // TODO: here, we assume [0] will be the initial with the needed data, but in weird cases, could be the 0-RTT one is first... too bad for now 
+                const rawPackets = PCAPUtil.extractQUICPackets(rawEntry["_source"]["layers"]["quic"]);
+                if ( !rawPackets || rawPackets.length === 0 ) {
+                    this.exit("ParserPCAP: invalid QUIC packet found in this pcap", rawPackets);
+                }
+
+                if ( this.debugging && (debug_packetCount % 100 === 0 || debug_packetCount === this.jsonRoot.length - 1) ) {
+                    console.log("Processing rawEntry ", debug_packetCount);
+                }
+                ++debug_packetCount;
+
+                for ( const rawPacket of rawPackets ) {
+
+                    // 2.1
+                    const packetInfo:{ packetType:qlog.PacketType, header:qlog.IPacketHeader|undefined } = this.convertPacketHeader( rawPacket );
+                    if ( packetInfo.packetType === qlog.PacketType.unknown && packetInfo.header === undefined ) {
+                        // padding/garbage packet, skipping
+                        continue;
+                    }
+
+                    const parsedHeader = packetInfo.header!;
+
+                    // check if a CID was zero length and we need to fall back to IP-based shenanigans... rough
+                    if ( parsedHeader.scid === ParserPCAP.DEFAULT_SCID) {
+                        parsedHeader.scid = this.IPtoCID( true, rawEntry );
+                    }
+                    if ( parsedHeader.dcid === ParserPCAP.DEFAULT_DCID ) {
+                        parsedHeader.dcid = this.IPtoCID( false, rawEntry );
+                    }
+
+                    // 2.2
+                    let trace:TraceWrapper|undefined = this.getTrace( parsedHeader );
+                    if ( trace === undefined ) {
+                        if ( packetInfo.packetType === qlog.PacketType.initial ) {
+
+                            let rawFrames = rawPacket["quic.frame"];
+                            if ( !Array.isArray(rawFrames) ) {
+                                rawFrames = [ rawFrames ];
+                            }
+
+                            if ( !PCAPUtil.ensurePathExists("tls.handshake/tls.handshake.type", rawFrames[0], false ) ) {
+                                this.exit("ParserPCAP: no tls info known for the first QUIC initial, not supported! Are you sure the trace decrypted?", rawPacket, rawPacket["quic.frame"] );
+                            }
+                            else {
+                                if ( rawFrames[0]["tls.handshake"]["tls.handshake.type"] !== "1" ){ // 1 === ClientHello. 2 === ServerHello
+                                    this.exit("ParserPCAP: first QUIC initial in this trace is ServerHello. Pcap2qlog needs the ClientHello to work properly.", rawPackets);
+                                }
+                                else {
+                                    trace = this.addTrace( rawEntry, parsedHeader );
+                                }
+                            }
+                        }
+                        else {
+                            this.exit("ParserPCAP: trace doesn't start with the first initial, not yet supported. Abandoning", packetInfo.packetType, packetInfo.header );
+                        }
+                    }
+
+                    // need to keep track of CIDs during connection setup (client-side is done in :addTrace, this is for the server-side)
+                    if ( packetInfo.packetType === qlog.PacketType.initial ) {
+                        // TODO: add check if it's actually from the server side? isn't this implied though? for the client-side, we already add the scid to the map in :addTrace
+                        // if we have an initial from the server to the client, we might not have added the server SCID to our lookup map
+                        if ( !this.CIDToODCIDMap.has(parsedHeader.scid!) ) {
+                            const odcid = this.CIDToODCIDMap.get( parsedHeader.dcid! );
+                            if ( odcid !== undefined ) {
+
+                                if ( trace!.currentServerCID !== undefined ) {
+                                    this.exit("ParserPCAP: trace already had a serverCID set and sees another initial with a new CID... shouldn't happen!");
+                                }
+
+                                if ( this.debugging ) {
+                                    console.log("ParserPCAP: adding server scid to CID map: ", parsedHeader.scid, odcid);
+                                }
+                                this.CIDToODCIDMap.set( parsedHeader.scid!, odcid ); // scid here is the server-chosen CID in the server's initial 
+
+                                trace!.currentServerCID = parsedHeader.scid!;
+                            }
+                            else {
+                                this.exit("ParserPCAP: trying to add the second CID indirection (server -> client) but couldn't find the ODCID!", parsedHeader );
+                            }
+                        }
+                    }
+
+                    const rawFrame = rawEntry["_source"]["layers"]["frame"];
+                    const time = this.getTime( rawFrame );
+                    trace!.currentTime = Math.round( (time - trace!.referenceTime) * 1000 ); // relative to the trace's first timestamp. Time is in nanoseconds
+
+                    // 2.3
+                    this.checkVersionUpdate( trace!, parsedHeader );
+                    this.checkSpinBitUpdate( trace!, rawPacket    );
+                    if ( trace!.currentServerCID !== undefined ) { // if undefined, we've not yet seen the ServerHello and CID cannot change
+                        this.checkCIDUpdate(     trace!, parsedHeader ); // if we started using a new CID issued by NEW_CID frames
+                    }
+
+                    // 2.4
+                    // we work from the perspective of the client
+                    let transportEventType: TransportEventType = TransportEventType.packet_received;
+                    if ( this.sentByClient( trace!, parsedHeader ) ) {
+                        transportEventType = TransportEventType.packet_sent;
+                    }
+
+                    const evtData: IEventPacket = {
+                        packet_type: packetInfo.packetType,
+                        header: packetInfo.header!,
+                    };
+
+                    const frames = this.extractFrames( trace!, rawPacket );
+                    evtData.frames = frames;
+
+                    // used to be: this.addNewCID(dcid, frame.connection_id);
+                    this.updateCIDsFromFrames( trace!, parsedHeader, frames ); // link NEW_CID frames to internal Trace state so we can bind packets to the correct trace
+
+
+                    // 2.4
+                    this.addEvent(trace!, [
+                        "" + trace!.currentTime,
+                        EventCategory.transport,
+                        transportEventType,
+                        evtData
+                    ]);
+                
+                } // done processing single QUIC packet
+
+            } // done processing raw JSON entry
+
+            const traces = [];
+            for ( const wrapper of this.traceMap.values() ) {
+                traces.push( wrapper.qlogTrace );
+            }
+
+            output = {
+                qlog_version: "draft-02-wip",
+                title: "" + this.originalFileURI,
+                description: "qlog converted from " + this.originalFileURI,
+                traces: traces
+            };
+
+            if ( this.debugging ) {
+                console.log("Found packets: ", debug_totalPacketcount);
+                console.log("Of which QUIC: ", debug_totalPacketcount);
+                console.log("Split over traces: ", this.traceMap.size);
+            }
+
+            return output!;
+        }
+
+
+        protected getTrace( packetHeader:qlog.IPacketHeader ):TraceWrapper | undefined {
+            let odcid = this.CIDToODCIDMap.get( "" + packetHeader.dcid );
+
+            if ( odcid ) {
+                const trace = this.traceMap.get( odcid );
+                if ( !trace ) {
+                    this.exit( "getTrace: ODCID was found, but no trace was coupled!", odcid );
+                }
+                else {
+                    return trace;
+                }
+            }
+            else {
+                return undefined; // haven't seen this connection before. Should be followed up with a call to addTrace to add it
+            }
+        }
+
+        // packet MUST be a client-side initial (TLS ClientHello) to work properly 
+        protected addTrace( firstRawEntry:any, firstPacketHeader:qlog.IPacketHeader ):TraceWrapper {
+
+            let odcid = firstPacketHeader.dcid;
+            this.CIDToODCIDMap.set( odcid!, odcid! );
+            this.CIDToODCIDMap.set( firstPacketHeader.scid!, odcid! ); // the first packet's source cid from te client becomes the server's dcid from then on
+
+            if ( this.debugging ) {
+                console.log("ParserPCAP: adding new trace: ODCID ", odcid, " from client scid", firstPacketHeader.scid);
+            }
+
+            const traceNr = this.traceMap.size + 1;
+
+            const referenceTime = this.getTime(firstRawEntry["_source"]["layers"]["frame"]);
+
+            const trace:qlog.ITrace = {
+                title: "Connection " + traceNr,
+                description: "Connection " + traceNr + " in qlog from pcap " + this.originalFileURI,
                 vantage_point: {
                     name: "pcap",
                     type: VantagePointType.network,
@@ -45,33 +280,79 @@ export class ParserPCAP {
                 configuration: {
                     time_offset: "0",
                     time_units: "ms",
-                    original_uris: [ originalFile ],
+                    original_uris: [ this.originalFileURI ],
                 },
                 common_fields: {
-                    group_id: this.getConnectionID(), // Original destination connection id
-                    // group_ids: ,
+                    group_id: odcid, // Original destination connection id
                     protocol_type: "QUIC",
-                    reference_time: this.getStartTime().toString(),
+                    reference_time: "" + referenceTime
                 },
                 event_fields: [IDefaultEventFieldNames.relative_time, IDefaultEventFieldNames.category, IDefaultEventFieldNames.event, IDefaultEventFieldNames.data],
                 events: []
             };
 
+            const wrapper:TraceWrapper = {
+                qlogTrace: trace,
+                referenceTime: referenceTime,
+                currentTime: referenceTime,
+                trailingEvents: [],
+
+                currentClientCID: firstPacketHeader.scid,
+                currentServerCID: undefined, // will only know this once the server sends its initial
+
+                clientIssuedCIDs: [],
+                serverIssuedCIDs: [],
+
+                spinbit: false,
+                currentVersion: "unknown",
+                selectedALPN: undefined
+            }
+
+            this.traceMap.set( odcid!, wrapper );
+
             // First event = new connection
-            this.addEvent([
+            this.addEvent(wrapper, [
                 "0",
                 qlog.EventCategory.connectivity,
                 qlog.ConnectivityEventType.connection_started,
-                this.getConnectionInfo() as qlog.IEventConnectionStarted,
+                this.getConnectionInfo(firstRawEntry, firstPacketHeader) as qlog.IEventConnectionStarted,
             ]);
+
+            return wrapper;
         }
+
+        protected sentByClient( trace:TraceWrapper, header:qlog.IPacketHeader ) {
+            if ( header.dcid === trace.currentClientCID ) { // currentClientCID is the DCID used by the server to send to the client. So if they are equal, means the server was sending here.
+                return false;
+            }
+            else {
+                return true;
+            }
+        }
+
+        protected exit(message:string, ...args:Array<any> ) {
+            if ( this.debugging ) {
+                console.log( message, args );
+            }
+
+            let argString = "";
+            if ( args && args.length > 0 ) {
+                argString = " : " + args.reduce((previous:any, current:any) => {
+                    return previous + ", " + JSON.stringify(current);
+                });
+            }
+
+            throw new Error(message + argString);
+        }
+
+        
 
         // Adds an event to the list of events
         // Also appends all trailing events immediately after the new event (see addTrailingEvents() function for more details)
-        public addEvent(event: EventField[]) {
-            this.trace.events.push(event);
-            this.trace.events = this.trace.events.concat(this.trailingEvents);
-            this.trailingEvents = [];
+        protected addEvent(trace:TraceWrapper, event: EventField[]) {
+            trace.qlogTrace.events.push(event);
+            trace.qlogTrace.events = trace.qlogTrace.events.concat(trace.trailingEvents);
+            trace.trailingEvents = [];
         }
 
         // Adds an event to a queue which will be added to the event list after the next main event
@@ -80,82 +361,43 @@ export class ParserPCAP {
         //  The logical order to log these events is to log the packet received event before the connection close event
         //  This is however not always easy as the connection close event is discovered before the packet received event is fully completed
         // Therefore one is able to queue the connection close event first by calling addTrailingEvent(connectionCloseEvent) first when the connection close frame is discovered and later calling addEvent(packetReceivedEvent) when the packet received event is ready while still maintaining the expected order of events
-        public addTrailingEvent(event: EventField[]) {
-            this.trailingEvents.push(event);
+        protected addTrailingEvent(trace:TraceWrapper, event: EventField[]) {
+            trace.trailingEvents.push(event);
         }
 
-        // Updates the server's CID after its initial response
-        public checkInitialServerCIDUpdate(scid: string, dcid: string, relativeTime: string) {
-            // In the server's first response, the conn id should be changed
-            if (this.serverCIDChanged === false && dcid === this.clientCID) {
-                this.serverCIDChanged = true;
-                // Create an event that the connection id has changed
-                this.addEvent([
-                    relativeTime,
-                    qlog.EventCategory.connectivity,
-                    qlog.ConnectivityEventType.connection_id_updated,
-                    {
-                        dst_old: this.serverCID,
-                        dst_new: scid,
-                    } as qlog.IEventConnectionIDUpdated,
-                ]);
-                this.serverCID = scid;
+        protected IPtoCID( source:boolean, rawEntry:any ) {
+            let IP = rawEntry._source.layers.ip;
+            let IPsrcField = "ip.src";
+            let IPdstField = "ip.dst";
+            if ( !IP ) {
+                IP = rawEntry._source.layers.ipv6;
+                IPsrcField = "ipv6.src";
+                IPdstField = "ipv6.dst";
             }
+
+            const UDP = rawEntry._source.layers.udp;
+
+            let output = "zerolengthCID:";
+
+            if ( source ) {
+                output += IP[ IPsrcField ] + ":" + UDP["udp.srcport"];
+            }
+            else {
+                output += IP[ IPdstField ] + ":" + UDP["udp.dstport"]; 
+            }
+
+            return output;
         }
 
-        // Checks if a CID is in the pool of permitted CIDs for either server or client
-        // If so, CID for that endpoint must have changed to the new one
-        public checkCIDUpdate(cid: string, relativeTime: string) {
-            // Client conn id must have changed if the CID is in its pool of permitted CIDs
-            if (this.clientPermittedCIDs.has(cid)) {
-                this.addEvent([ // Log the change of cid
-                    relativeTime,
-                    qlog.EventCategory.connectivity,
-                    qlog.ConnectivityEventType.connection_id_updated,
-                    {
-                        src_old: this.clientCID,
-                        src_new: cid,
-                    } as qlog.IEventConnectionIDUpdated,
-                ]);
-                this.clientCID = cid;
-                this.clientPermittedCIDs.delete(cid);
-            }
-            // Server connection id must have changed if the CID is in its pool of permitted CIDs
-            else if (this.serverPermittedCIDs.has(cid)) {
-                // Create an event that the connection id has changed
-                this.addEvent([
-                    relativeTime,
-                    qlog.EventCategory.connectivity,
-                    qlog.ConnectivityEventType.connection_id_updated,
-                    {
-                        dst_old: this.serverCID,
-                        dst_new: cid,
-                    } as qlog.IEventConnectionIDUpdated,
-                ]);
-                this.serverCID = cid;
-                this.serverPermittedCIDs.delete(cid);
-            }
-        }
-
-        public addNewCID(dcid: string, newCID: string) {
-            // Checks the dcid to see who the new CID will belong to and adds it to that endpoint's pool
-            // Also logs the new connection id event
-            if (this.clientCID === dcid || this.clientPermittedCIDs.has(dcid)) {
-                this.clientPermittedCIDs.add(newCID);
-            } else if (this.serverCID === dcid || this.serverPermittedCIDs.has(dcid)) {
-                this.serverPermittedCIDs.add(newCID);
-            } else {
-                // throw new Error("DCID of QUIC packet belongs to neither client nor server " + this.serverCID + ", " + this.clientCID + " -> " + dcid + " // " + newCID );
-                // this happens with 0-length ConnectionIDs... we don't support this yet
-            }
-        }
-
-        public checkSpinBitUpdate(spinbit: string, relativeTime: string) {
+        protected checkSpinBitUpdate( trace:TraceWrapper, rawPacket:any ) {
+            
+            const spinbit:string = rawPacket["quic.spin_bit"];
             const spinbitBool: boolean = spinbit === "1";
-            if (this.spinbit !== spinbitBool) {
-                this.spinbit = spinbitBool;
-                this.addEvent([
-                    relativeTime,
+
+            if (trace.spinbit !== spinbitBool) {
+                trace.spinbit = spinbitBool;
+                this.addEvent(trace, [
+                    "" + trace.currentTime,
                     EventCategory.connectivity,
                     ConnectivityEventType.spin_bit_updated,
                     {
@@ -165,183 +407,274 @@ export class ParserPCAP {
             }
         }
 
-        public static Parse(jsonContents:any, originalFile: string, logRawPayloads: boolean, secretsContents:any):qlog.IQLog {
-            let pcapParser = new ParserPCAP( jsonContents, originalFile );
-
-            if( secretsContents ){
-                //TODO: add keys to the qlog output (if available)
-            }
-
-            for ( let packet of jsonContents ) {
-                let frame = packet['_source']['layers']['frame'];
-                let quic = packet['_source']['layers']['quic'];
-
-                if ( !quic )
-                    continue;
-
-                let time = parseFloat(frame['frame.time_epoch']);
-                let time_relative: number = pcapParser.trace.common_fields !== undefined && pcapParser.trace.common_fields.reference_time !== undefined ? Math.round((time - parseFloat(pcapParser.trace.common_fields.reference_time)) * 1000) : -1;
-
-                function extractEventsFromPacket(jsonPacket:any) {
-                    let header = {} as qlog.IPacketHeader;
-
-                     // console.log ( "-----------------------------" );
-                     // console.log ( jsonPacket );
-
-                    let jsonHeader = jsonPacket;
-                    let headerForm:"long"|"short" = "long";
-
-                    if (jsonPacket['quic.header_form'] == '1' || jsonPacket['quic.long'] ) // LONG header
+        protected checkVersionUpdate( trace:TraceWrapper, header:qlog.IPacketHeader ) {
+            if ( header.version !== "" && header.version !== undefined && trace.currentVersion !== header.version ) {
+                this.addTrailingEvent(trace, [
+                    "" + trace.currentTime,
+                    EventCategory.transport,
+                    TransportEventType.parameters_set,
                     {
-                        // at the time of writing, there are no quic.long entries in tshark's output yet
-                        // however, they switched to using quic.short below, so we're trying some defensive programming here...
-                        if ( jsonPacket['quic.long'] )
-                            jsonHeader = jsonPacket['quic.long'];
+                        version: header.version
+                    } as qlog.IEventTransportParametersSet
+                ]);
 
-                        headerForm = "long";
+                trace.currentVersion = header.version!;
+            }
+        }
 
-                        header.version = jsonHeader['quic.version'];
-                        if ( jsonHeader["quic.scid"] )
-                            header.scid = jsonHeader["quic.scid"].replace(/:/g, '');
-                        else 
-                            header.scid = ParserPCAP.DEFAULT_SCID;
+        protected checkCIDUpdate( trace:TraceWrapper, header:qlog.IPacketHeader ){
+            
+            if( header.dcid !== trace.currentServerCID && header.dcid !== trace.currentClientCID ) {
+                // something changed in this header
+                // we don't know which direction it is at this point, so need to check in both lists
+                // lists do not need to contain the original CIDs because they are set the first time they're used 
 
-                        if ( jsonHeader["quic.dcid"] )
-                            header.dcid = jsonHeader["quic.dcid"].replace(/:/g, '');
-                        else 
-                            header.dcid = ParserPCAP.DEFAULT_DCID;
-                        
-                        header.scil = jsonHeader['quic.scil'].replace(/:/g, '');
-                        header.dcil = jsonHeader['quic.dcil'].replace(/:/g, '');
-                        // for packets that cannot be decrypted, these fields are sometimes not present, so skip them in those cases
-                        if ( jsonHeader['quic.payload'] ){
-                            header.payload_length = jsonHeader['quic.payload'].replace(/:/g, '').length / 2;
-                        }
-                        else {
-                           header.payload_length = 0;
-                        }
-                        header.packet_number = jsonHeader['quic.packet_number'];
-                        header.packet_size = parseInt(jsonPacket['quic.packet_length']);
-                    }
-                    else if ( jsonPacket['quic.header_form'] == '0' || jsonPacket['quic.short'] ) { // SHORT
+                // we view from the client prespective, so server CID changes are destination, while client CID changes are source
 
-                        if ( jsonPacket['quic.short'] )
-                            jsonHeader = jsonPacket['quic.short'];
+                if ( this.debugging ) {
+                    console.log("Something changed in the CID, checking : new CID ", header.dcid, ", current towards server: ", trace.currentServerCID, " current towards client: ", trace.currentClientCID );
+                }
 
-                        headerForm = "short";
+                // server issued this CID, so the client can use it to contact the server
+                if ( trace.serverIssuedCIDs.indexOf(header.dcid!) ) { // if undefined, it's just not initialized yet: skip
 
-                        header.scid = undefined; // better safe than sorry
-                        if ( jsonHeader["quic.dcid"] )
-                            header.dcid = jsonHeader["quic.dcid"].replace(/:/g, '');
-                        else 
-                            header.dcid = ParserPCAP.DEFAULT_DCID;
-
-                        // for packets that cannot be decrypted, these fields are sometimes not present, so skip them in those cases
-                        if ( jsonHeader['quic.protected_payload'] ){
-                            header.payload_length = jsonHeader['quic.protected_payload'].replace(/:/g, '').length / 2;
-                        }
-                        else {
-                            header.payload_length = 0;
-                        }
-                        header.packet_number = jsonHeader['quic.packet_number'];
-                        header.packet_size = parseInt(jsonPacket['quic.packet_length']);
-                    }
-                    else {
-                        console.error("INVALID HEADER FORM!", jsonPacket);
-                    }
-
-                    const isVersionNegotiation: boolean = header.version !== undefined ? parseInt(header.version, 16) === 0x00 : false;
-
-                    const entry: IEventPacket = {
-                        packet_type: headerForm === "long" ? (isVersionNegotiation ? qlog.PacketType.version_negotiation : PCAPUtil.getPacketType(parseInt(jsonHeader['quic.long.packet_type']))) : qlog.PacketType.onertt,
-                        header: header,
-                    };
-
-                    entry.frames = [];
-                    const dcid = jsonHeader["quic.dcid"] ? jsonHeader["quic.dcid"].replace(/:/g, '') : ParserPCAP.DEFAULT_DCID;
-
-                    // If there are multiple quic frames, extract data from each of them. If there is only a single frame quic.frame will be an object instead of an array
-                    if (Array.isArray(jsonPacket["quic.frame"])) {
-                        for (const frame of jsonPacket["quic.frame"]) {
-                            entry.frames.push(ParserPCAP.extractQlogFrame(frame, pcapParser, dcid, time_relative.toString(), logRawPayloads));
-                        }
-                    } else if (jsonPacket["quic.frame"] !== undefined) {
-                        entry.frames.push(ParserPCAP.extractQlogFrame(jsonPacket["quic.frame"], pcapParser, dcid, time_relative.toString(), logRawPayloads));
-                    }
-
-                    //x = [] as qlog.IEventPacketRX;
-
-                    const transportEventType: TransportEventType = (pcapParser.clientCID === dcid || pcapParser.clientPermittedCIDs.has(dcid)) ? TransportEventType.packet_received : TransportEventType.packet_sent;
-
-                    pcapParser.addEvent([
-                        time_relative.toString(),
-                        EventCategory.transport,
-                        transportEventType,
-                        entry
+                    this.addEvent(trace, [ // Log the change of cid
+                        "" + trace.currentTime,
+                        qlog.EventCategory.connectivity,
+                        qlog.ConnectivityEventType.connection_id_updated,
+                        {
+                            dst_old: trace.currentServerCID,
+                            dst_new: header.dcid,
+                        } as qlog.IEventConnectionIDUpdated,
                     ]);
 
-                    if ( headerForm === "long" ) {
-                        if (header.version !== pcapParser.currentVersion && header.version !== undefined && parseInt(header.version, 16) !== 0) {
-                            pcapParser.addEvent([
-                                time_relative.toString(),
-                                EventCategory.transport,
-                                TransportEventType.parameters_set,
-                                {
-                                    version: header.version
-                                } as qlog.IEventTransportParametersSet
-                            ]);
-                            pcapParser.currentVersion = header.version;
-                        }
-                    } else if ( headerForm === "short" ) {
-                        pcapParser.checkSpinBitUpdate(jsonHeader["quic.spin_bit"], time_relative.toString());
-                    }
-                    else {
-                        console.error("INVALID HEADER FORM!", jsonPacket);
-                    }
-
-                    return {scid: header.scid, dcid: header.dcid!};
+                    trace.currentServerCID = header.dcid; 
                 }
 
-                // "quic" property is either an object containing the data of a single quic packet or an array containing the data of multiple quic packets coalesced into one datagram
-                if (Array.isArray(quic)) {
-                    for (const packet of quic) {
-                        const {scid, dcid} = extractEventsFromPacket(packet);
-                        // const scid: string | undefined = (packet["quic.scid"]) ? packet["quic.scid"].replace(/:/g, '') : undefined; // Short form headers don't have a scid field
-                        // const dcid: string = packet["quic.dcid"].replace(/:/g, '');
+                else if ( trace.clientIssuedCIDs.indexOf(header.dcid!) ) {
 
-                        if (scid !== undefined) {
-                            pcapParser.checkInitialServerCIDUpdate(scid, dcid, time_relative.toString());
+                    this.addEvent(trace, [ // Log the change of cid
+                        "" + trace.currentTime,
+                        qlog.EventCategory.connectivity,
+                        qlog.ConnectivityEventType.connection_id_updated,
+                        {
+                            src_old: trace.currentClientCID,
+                            src_new: header.dcid,
+                        } as qlog.IEventConnectionIDUpdated,
+                    ]);
 
-                            pcapParser.checkCIDUpdate(scid, time_relative.toString());
-                        }
+                    trace.currentClientCID = header.dcid;
+                }
+                else {
+                    this.exit("ParserPCAP:checkCIDUpdate: CID changed, but not to a value chosen by either client or server... shouldn't happen!", header, trace );
+                }
+            }
+        }
 
-                        pcapParser.checkCIDUpdate(dcid, time_relative.toString());
+        protected updateCIDsFromFrames( trace:TraceWrapper, frameContainingPacketHeader:qlog.IPacketHeader, frames:Array<qlog.QuicFrame> ) {
+            
+            const odcid = this.CIDToODCIDMap.get(frameContainingPacketHeader.dcid!);
+            if ( !odcid ) {
+                this.exit("updateCIDsFromFrames: header dcid didn't have a mapping itself!", frameContainingPacketHeader, this.CIDToODCIDMap );
+            }
+
+            const clientIssued = this.sentByClient( trace, frameContainingPacketHeader );
+
+            for ( const frame of frames ) {
+                if ( frame.frame_type === qlog.QUICFrameTypeName.new_connection_id ) {
+                    this.CIDToODCIDMap.set( frame.connection_id, odcid! );
+
+                    if ( clientIssued ) {
+                        trace.clientIssuedCIDs.push( frame.connection_id );
                     }
-                } else {
-                    const {scid, dcid} = extractEventsFromPacket(quic);
-                    // const scid: string | undefined = (quic["quic.scid"]) ? quic["quic.scid"].replace(/:/g, '') : undefined;
-                    // const dcid: string = quic["quic.dcid"].replace(/:/g, '');
-
-                    if (scid !== undefined) {
-                        pcapParser.checkInitialServerCIDUpdate(scid, dcid, time_relative.toString());
-
-                        pcapParser.checkCIDUpdate(scid, time_relative.toString());
+                    else {
+                        trace.serverIssuedCIDs.push( frame.connection_id );
                     }
+                }
+            }
+        }
 
-                    pcapParser.checkCIDUpdate(dcid, time_relative.toString());
+        protected getPacketType( rawQuicPacket:any ): qlog.PacketType {
+
+            /* Example long packet:
+            "quic.packet_length": "1252",
+            "quic.header_form": "1",
+            "quic.fixed_bit": "1",
+            "quic.long.packet_type": "0",
+            "quic.long.reserved": "0",
+            "quic.packet_number_length": "0",
+            "quic.version": "0xff00001d",
+            "quic.dcil": "18",
+            "quic.dcid": "f3:6e:07:bf:0b:70:88:ef:28:c7:1d:48:8a:ca:af:f3:9f:fc",
+            "quic.scil": "17",
+            "quic.scid": "43:94:4e:da:18:be:b7:e5:48:b3:8d:37:5b:f3:c2:a3:bc",
+            "quic.token_length": "0",
+            "quic.length": "1207",
+            "quic.packet_number": "0",
+            */
+
+            /* example short packet:
+            "quic.packet_length": "39",
+            "quic.short": {
+                "quic.header_form": "0",
+                "quic.fixed_bit": "1",
+                "quic.spin_bit": "0",
+                "quic.dcid": "43:94:4e:da:18:be:b7:e5:48:b3:8d:37:5b:f3:c2:a3:bc"
+            },
+            */
+
+            if ( rawQuicPacket["quic.header_form"] === "1" || rawQuicPacket["quic.long"] ){ // LONG header
+                if ( rawQuicPacket["quic.long"] )
+                    rawQuicPacket = rawQuicPacket["quic.long"];
+
+                // if quic.version is 0, it's a version negotiation packet
+                // otherwise, the packet type is in "quic.long.packet_type"
+                const isVersionNegotiation: boolean = rawQuicPacket["quic.version"] !== undefined ? parseInt(rawQuicPacket["quic.version"], 16) === 0x00 : false;
+                if ( isVersionNegotiation ) {
+                    return qlog.PacketType.version_negotiation;
+                }
+                else {
+                    const rawPacketType = parseInt( rawQuicPacket["quic.long.packet_type"], 16 );
+
+                    if (rawPacketType === 0x00)
+                        return qlog.PacketType.initial;
+                    else if (rawPacketType === 0x01)
+                        return qlog.PacketType.zerortt;
+                    else if (rawPacketType === 0x02)
+                        return qlog.PacketType.handshake;
+                    else if (rawPacketType === 0x03)
+                        return qlog.PacketType.retry;
+                }
+            }
+            else if ( rawQuicPacket["quic.short"] ) {
+                return qlog.PacketType.onertt;
+            }
+            else {
+                return qlog.PacketType.unknown;
+            }
+
+            return qlog.PacketType.unknown;
+        }
+
+        protected convertPacketHeader( rawQuicPacket:any ): { packetType:qlog.PacketType, header: qlog.IPacketHeader | undefined } {
+            let header = {} as qlog.IPacketHeader;
+
+            let packetType:qlog.PacketType = this.getPacketType( rawQuicPacket );
+
+            if ( packetType === qlog.PacketType.unknown ) {
+                // some options may pass (e.g., padding/garbage in the rest of the UDP)
+                if ( Object.keys(rawQuicPacket).length === 2 && 
+                     rawQuicPacket["quic.packet_length"] && rawQuicPacket["quic.remaining_payload"] ) {
+                    // garbage, ignore
+                    if ( this.debugging ) {
+                        console.log("convertPacketHeader: Found garbage packet, ignoring", rawQuicPacket);
+                    }
+                    return { packetType: packetType, header: undefined };
+                }
+                else {
+                    this.exit("convertPacketHeader: unknown QUIC packet type found! ", rawQuicPacket );
                 }
             }
 
-            let output: qlog.IQLog;
-            output = {
-                qlog_version: "draft-01",
-                title: "" + originalFile,
-                description: "qlog converted from " + originalFile,
-                traces: [pcapParser.trace]
-            };
+            // the header doesn't always directly contain the packets... sometimes we have to go 1 level deeper (quic.short)
+            // rawHeader is the header entrypoint, so tsharkQuicPacket can stay the packet entry point (needed for e.g., packet_length)
+            let rawHeader = rawQuicPacket;
+
+            if (  packetType !== qlog.PacketType.onertt ) // LONG header
+            {
+                // at the time of writing, there are no quic.long entries in tshark's output yet
+                // however, they switched to using quic.short below, so we're trying some defensive programming here...
+                if ( rawHeader["quic.long"] ){
+                    rawHeader = rawHeader["quic.long"];
+                }
+
+                
+                header.version = rawHeader["quic.version"];
+                header.scid = this.getSourceConnectionID( rawHeader );
+                header.dcid = this.getDestinationConnectionID( rawHeader );
+
+                header.scil = "" + parseInt( rawHeader["quic.scil"], 10 );
+                header.dcil = "" + parseInt( rawHeader["quic.dcil"], 10 );
+
+                if ( packetType === qlog.PacketType.version_negotiation ) {
+                    // supported versions are not part of the header in qlog, so not extracted here
+                }
+                else if ( packetType === qlog.PacketType.retry ) {
+                    // TODO: rework when these fields are added to qlog proper
+                    (header as any).token = rawHeader["quic.retry_token"];
+                    (header as any).integrity_tag = ("" + rawHeader["quic.retry_integrity_tag"]).replace(/:/g, '');
+                    if ( rawHeader["quic.retry_token"] ) {
+                        (header as any).token_length = rawHeader["quic.retry_token"].replace(/:/g, '').length / 2; // TODO: verify how wireshark encodes this. We assume it's a : delimited hex field now
+                    }
+                }
+                else { // initial, handshake, 0-RTT
+                    header.packet_number = "" + rawHeader['quic.packet_number'];
+                    header.packet_size = parseInt( rawQuicPacket["quic.packet_length"] ); // note: not part of the header in wireshark, but of the total quic packet
+
+                    // for packets that cannot be decrypted, these fields are sometimes not present, so skip them in those cases
+                    if ( rawHeader["quic.payload"] ) {
+                        header.payload_length = rawHeader['quic.payload'].replace(/:/g, '').length / 2;
+                    }
+                    else {
+                        header.payload_length = 0;
+                    }
+
+                    if ( packetType === qlog.PacketType.initial ) {
+                        // TODO: rework when these fields are added to qlog proper
+                        (header as any).token = rawHeader["quic.token"];
+                        (header as any).token_length = parseInt( rawHeader["quic.token_length"] );
+                    }
+                }
+            }
+            else { // short header, 1rtt packet
+
+                if ( rawHeader["quic.short"] ) {
+                    rawHeader = rawHeader["quic.short"];
+                }
+
+                header.scid = undefined; // short headers don't carry this field, make sure it's not set
+                header.dcid = this.getDestinationConnectionID( rawHeader );
+
+                header.packet_number = "" + rawHeader['quic.packet_number'];
+                header.packet_size = parseInt( rawQuicPacket["quic.packet_length"] ); // note: not part of the header in wireshark, but of the total quic packet
+
+                // for packets that cannot be decrypted, these fields are sometimes not present, so skip them in those cases
+                if ( rawHeader["quic.protected_payload"] ) {
+                    header.payload_length = rawHeader['quic.protected_payload'].replace(/:/g, '').length / 2;
+                }
+                else {
+                    header.payload_length = 0;
+                }
+            }
+
+            return { packetType: packetType, header: header };
+        }
+
+
+        protected extractFrames(trace:TraceWrapper, rawPacket:any):Array<qlog.QuicFrame> {
+
+            let output = [];
+
+            let rawFrames:Array<qlog.QuicFrame> = [];
+
+            if ( !rawPacket["quic.frame"] ) {
+                return rawFrames;
+            }
+
+            if( Array.isArray(rawPacket["quic.frame"]) ){
+                rawFrames = rawPacket["quic.frame"];
+            }
+            else {
+                rawFrames = [ rawPacket["quic.frame"] ];
+            }
+
+            for (const rawFrame of rawFrames) {
+                output.push( this.extractQlogFrame(trace, rawFrame));
+            }
 
             return output;
         }
+
 
         private static extractALPNs(tsharkTLSHandshake: any): string[] {
             let alpnKey = undefined;
@@ -384,28 +717,27 @@ export class ParserPCAP {
         }
 
         // TODO move to util file
-        public static extractQlogFrame(tsharkFrame: any, parser: ParserPCAP, dcid: string, relativeTime: string, logRawPayloads: boolean): QuicFrame {
-            const frameType = PCAPUtil.getFrameTypeName(parseInt(tsharkFrame["quic.frame_type"]));
-            const scid: string = dcid === parser.clientCID ? parser.serverCID : parser.clientCID;
+        protected extractQlogFrame( trace:TraceWrapper, rawFrame: any ): QuicFrame {
+            const frameType = PCAPUtil.getFrameTypeName(parseInt(rawFrame["quic.frame_type"]));
 
             switch (frameType) {
                 case QUICFrameTypeName.padding:
-                    return this.convertPaddingFrame(tsharkFrame);
+                    return ParserPCAP.convertPaddingFrame(rawFrame);
                 case QUICFrameTypeName.ping:
-                    return this.convertPingFrame(tsharkFrame);
+                    return ParserPCAP.convertPingFrame(rawFrame);
                 case QUICFrameTypeName.ack:
-                    return this.convertAckFrame(tsharkFrame);
+                    return ParserPCAP.convertAckFrame(rawFrame);
                 case QUICFrameTypeName.reset_stream:
-                    return this.convertResetStreamFrame(tsharkFrame);
+                    return ParserPCAP.convertResetStreamFrame(rawFrame);
                 case QUICFrameTypeName.stop_sending:
-                    return this.convertStopSendingFrame(tsharkFrame);
+                    return ParserPCAP.convertStopSendingFrame(rawFrame);
                 case QUICFrameTypeName.crypto:
-                    const alpns: string[] = this.findALPNs(tsharkFrame);
+                    const alpns: string[] = ParserPCAP.findALPNs(rawFrame);
 
                     // ALPN can only be selected by server
-                    if (alpns.length === 1 && (dcid === parser.clientCID || parser.clientPermittedCIDs.has(dcid))) {
-                        parser.addTrailingEvent([
-                            relativeTime,
+                    if (alpns.length === 1 && trace.selectedALPN === undefined) {
+                        this.addTrailingEvent(trace, [
+                            "" + trace.currentTime,
                             EventCategory.transport,
                             TransportEventType.parameters_set,
                             {
@@ -413,49 +745,55 @@ export class ParserPCAP {
                                 alpn: alpns[0],
                             } as IEventTransportParametersSet,
                         ]);
-                        parser.selectedALPN = alpns[0];
+                        trace.selectedALPN = alpns[0];
                     }
-                    return this.convertCryptoFrame(tsharkFrame);
+                    return ParserPCAP.convertCryptoFrame(rawFrame);
                 case QUICFrameTypeName.new_token:
-                    return this.convertNewTokenFrame(tsharkFrame);
+                    return ParserPCAP.convertNewTokenFrame(rawFrame);
                 case QUICFrameTypeName.stream:
-                    return this.convertStreamFrame(tsharkFrame, logRawPayloads);
+                    return ParserPCAP.convertStreamFrame(rawFrame);
                 case QUICFrameTypeName.max_data:
-                    return this.convertMaxDataFrame(tsharkFrame);
+                    return ParserPCAP.convertMaxDataFrame(rawFrame);
                 case QUICFrameTypeName.max_stream_data:
-                    return this.convertMaxStreamDataFrame(tsharkFrame);
+                    return ParserPCAP.convertMaxStreamDataFrame(rawFrame);
                 case QUICFrameTypeName.max_streams:
-                    return this.convertMaxStreamsFrame(tsharkFrame);
+                    return ParserPCAP.convertMaxStreamsFrame(rawFrame);
                 case QUICFrameTypeName.stream_data_blocked:
-                    return this.convertStreamDataBlockedFrame(tsharkFrame);
+                    return ParserPCAP.convertStreamDataBlockedFrame(rawFrame);
                 case QUICFrameTypeName.streams_blocked:
-                    return this.convertStreamsBlockedFrame(tsharkFrame);
+                    return ParserPCAP.convertStreamsBlockedFrame(rawFrame);
                 case QUICFrameTypeName.new_connection_id:
-                    const frame = this.convertNewConnectionIDFrame(tsharkFrame);
-                    parser.addNewCID(dcid, frame.connection_id);
-                    return frame;
+                    return ParserPCAP.convertNewConnectionIDFrame(rawFrame);
                 case QUICFrameTypeName.retire_connection_id:
-                    return this.convertRetireConnectionIDFrame(tsharkFrame);
+                    return ParserPCAP.convertRetireConnectionIDFrame(rawFrame);
                 case QUICFrameTypeName.path_challenge:
-                    return this.convertPathChallengeFrame(tsharkFrame);
+                    return ParserPCAP.convertPathChallengeFrame(rawFrame);
                 case QUICFrameTypeName.path_response:
-                    return this.convertPathResponseFrame(tsharkFrame);
+                    return ParserPCAP.convertPathResponseFrame(rawFrame);
                 case QUICFrameTypeName.connection_close:
                     // Event should only be added after PacketReceived/PacketSent event
-                    parser.addTrailingEvent([
-                        relativeTime,
+                    this.addTrailingEvent(trace, [
+                        trace.currentTime,
                         EventCategory.connectivity,
                         ConnectivityEventType.connection_state_updated,
                         {
                             new: ConnectionState.closed
                         } as IEventConnectionStateUpdated,
                     ]);
-                    return this.convertConnectionCloseFrame(tsharkFrame);
+                    return ParserPCAP.convertConnectionCloseFrame(rawFrame);
                 default:
-                    return {
-                        frame_type: QUICFrameTypeName.unknown_frame_type,
-                        raw_frame_type: tsharkFrame["quic.frame_type"],
-                    } as IUnknownFrame;
+                    if ( parseInt(rawFrame["quic.frame_type"]) === 30 ) { // TODO: handle properly once we update the qlog library
+                        return ParserPCAP.convertHandshakeDoneFrame( rawFrame );
+                    }
+                    else {
+                        if( this.debugging ) {
+                            console.log("Unknown frame type found ", rawFrame["quic.frame_type"], rawFrame );
+                        }
+                        return {
+                            frame_type: QUICFrameTypeName.unknown_frame_type,
+                            raw_frame_type: rawFrame["quic.frame_type"],
+                        } as IUnknownFrame;
+                    }
             }
         }
 
@@ -478,19 +816,19 @@ export class ParserPCAP {
             let topAck: number = parseInt(tsharkAckFrame['quic.ack.largest_acknowledged']);
             let bottomAck = topAck - parseInt(tsharkAckFrame['quic.ack.first_ack_range']);
 
-            ackedRanges.push([bottomAck.toString(), topAck.toString()]);
+            ackedRanges.unshift([bottomAck.toString(), topAck.toString()]);
             if (ackRangeCount === 1) { // 1 gap
                 let gap: number = parseInt(tsharkAckFrame['quic.ack.gap']) + 2;
                 topAck = bottomAck - gap;
                 bottomAck = topAck - parseInt(tsharkAckFrame['quic.ack.ack_range']);
-                ackedRanges.push([bottomAck.toString(), topAck.toString()]);
+                ackedRanges.unshift([bottomAck.toString(), topAck.toString()]);
             } else if (ackRangeCount > 1) { // multiple gaps
                 let gap: number;
                 for (let i = 0; i < ackRangeCount; ++i) {
                     gap = parseInt(tsharkAckFrame['quic.ack.gap'][i]) + 2;
                     topAck = bottomAck - gap;
                     bottomAck = topAck - parseInt(tsharkAckFrame['quic.ack.ack_range'][i]);
-                    ackedRanges.push([bottomAck.toString(), topAck.toString()]);
+                    ackedRanges.unshift([bottomAck.toString(), topAck.toString()]);
                 }
             }
 
@@ -542,7 +880,7 @@ export class ParserPCAP {
         }
 
 
-        public static convertStreamFrame(tsharkStreamFrame: any, logRawPayloads: boolean): IStreamFrame {
+        public static convertStreamFrame(tsharkStreamFrame: any): IStreamFrame {
             return {
                 frame_type: QUICFrameTypeName.stream,
 
@@ -552,7 +890,7 @@ export class ParserPCAP {
                 length: tsharkStreamFrame["quic.stream.length"],
 
                 fin: tsharkStreamFrame["quic.frame_type_tree"]["quic.stream.fin"] === "1",
-                raw: logRawPayloads ? tsharkStreamFrame["quic.stream_data"].replace(/:/g, '') : undefined,
+                // raw: logRawPayloads ? tsharkStreamFrame["quic.stream_data"].replace(/:/g, '') : undefined,
             };
         }
 
@@ -656,6 +994,12 @@ export class ParserPCAP {
             };
         }
 
+        public static convertHandshakeDoneFrame( tsharkHandshakeDoneFrame: any ): any {
+            return {
+                frame_type: "handshake_done" // FIXME: add properly when we update the qlog library
+            };
+        }
+
         public static transportErrorCodeToEnum(errorCode: string): TransportError | string {
             const errorCodeNumber: number = parseInt(errorCode);
             if (errorCodeNumber === 0x00) {
@@ -729,40 +1073,42 @@ export class ParserPCAP {
             }
         }
 
-        public getQUICVersion(): string {
-            // Loop all packets, return as soon as a version is found
-            for (let x of this.jsonTrace) {
-                let quic = x['_source']['layers']['quic'];
-                // Only long headers contain version
-                if (quic['quic.header_form'] === '1') {
-                    return quic['quic.version'];
-                }
-                else if ( quic["quic.long"] ){
-                    return quic["quic.long"]['quic.version'];
-                }
+        public getQUICVersion(packet:any): string {
+            if (packet['quic.header_form'] === '1') {
+                return packet['quic.version'];
             }
-
-            return 'None';
+            else if ( packet["quic.long"] ){
+                return packet["quic.long"]['quic.version'];
+            }
+            else {
+                return 'None';
+            }
         }
 
-        public getConnectionID(): string {
-            if ( this.jsonTrace[0]['_source']['layers']['quic']['quic.scid'] )
-                return this.jsonTrace[0]['_source']['layers']['quic']['quic.scid'].replace(/:/g, '');
+        protected getSourceConnectionID( header:any ): string {
+            if ( header['quic.scid'] )
+                return header['quic.scid'].replace(/:/g, '');
             else 
                 return ParserPCAP.DEFAULT_SCID;
         }
 
-        public getStartTime(): number {
-            return parseFloat(this.jsonTrace[0]['_source']['layers']['frame']['frame.time_epoch']);
+        protected getDestinationConnectionID(header:any): string {
+            if ( header['quic.dcid'] )
+                return header['quic.dcid'].replace(/:/g, '');
+            else 
+                return ParserPCAP.DEFAULT_DCID;
         }
 
-        public getConnectionInfo() {
-            let layer_ip = this.jsonTrace[0]['_source']['layers']['ip'];
-            let layer_udp = this.jsonTrace[0]['_source']['layers']['udp'];
-            const layer_quic = this.jsonTrace[0]["_source"]["layers"]["quic"];
+        public getTime(frame:any): number {
+            return parseFloat(frame['frame.time_epoch']);
+        }
+
+        public getConnectionInfo(firstEntry:any, firstPacketHeader:qlog.IPacketHeader) {
+            let layer_ip = firstEntry['_source']['layers']['ip'];
+            let layer_udp = firstEntry['_source']['layers']['udp'];
 
             if(!layer_ip) {
-                layer_ip = this.jsonTrace[0]['_source']['layers']['ipv6'];
+                layer_ip = firstEntry['_source']['layers']['ipv6'];
                 return {
                     ip_version: layer_ip['ipv6.version'],
                     src_ip: layer_ip['ipv6.src'],
@@ -770,9 +1116,9 @@ export class ParserPCAP {
                     protocol: "QUIC",
                     src_port: layer_udp['udp.srcport'],
                     dst_port: layer_udp['udp.dstport'],
-                    quic_version: this.getQUICVersion(),
-                    src_cid: this.getConnectionID(),
-                    dst_cid: layer_quic["quic.dcid"] ? layer_quic["quic.dcid"].replace(/:/g, '') : ParserPCAP.DEFAULT_DCID,
+                    quic_version: firstPacketHeader.version,
+                    src_cid: firstPacketHeader.scid,
+                    dst_cid: firstPacketHeader.dcid
                 }
             }
 
@@ -783,10 +1129,9 @@ export class ParserPCAP {
                 protocol: "QUIC",
                 src_port: layer_udp['udp.srcport'],
                 dst_port: layer_udp['udp.dstport'],
-                quic_version: this.getQUICVersion(),
-                src_cid: this.getConnectionID(),
-                dst_cid: layer_quic["quic.dcid"] ? layer_quic["quic.dcid"].replace(/:/g, '') : ParserPCAP.DEFAULT_DCID,
+                quic_version: firstPacketHeader.version,
+                src_cid: firstPacketHeader.scid,
+                dst_cid: firstPacketHeader.dcid
             }
         }
-
 }

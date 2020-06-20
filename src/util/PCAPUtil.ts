@@ -3,17 +3,6 @@ import * as qlog from "@quictools/qlog-schema/dist/draft-01/QLog";
 
 export class PCAPUtil {
 
-    public static getPacketType(packetType: number): qlog.PacketType {
-        if (packetType === 0x00)
-            return qlog.PacketType.initial;
-        else if (packetType === 0x01)
-            return qlog.PacketType.zerortt;
-        else if (packetType === 0x02)
-            return qlog.PacketType.handshake;
-        else if (packetType === 0x03)
-            return qlog.PacketType.retry;
-        return qlog.PacketType.unknown;
-    }
 
     public static getFrameTypeName(frameType: number): qlog.QUICFrameTypeName {
         if (frameType === 0x00)
@@ -57,4 +46,37 @@ export class PCAPUtil {
         return qlog.QUICFrameTypeName.unknown_frame_type;
     }
 
+    public static extractQUICPackets( entry:any ) {
+         // in wireshark, an entry can contain 0, 1 or multiple QUIC packets
+         // multiple is always an array, 1 is always a normal object, 0 is a normal object but without useful fields
+         if ( Array.isArray(entry) ) {
+             return entry;
+         }
+         else {
+             // TODO: now we assume all quic packets are useful, revise once we've seen the contrary (have seen this many times with TCP)
+             return [entry];
+         }
+    }   
+
+    // jsonPath should be marked by / instead of ., because wireshark .jsons often use . inside of keys as well (because... logic)
+    // so it's more like xPath
+    public static ensurePathExists( jsonPath:string, obj:any, throwError:boolean = true ):boolean {
+        let pathElements = jsonPath.split("/");
+        let currentObj = obj;
+        for ( const el of pathElements ) {
+            if ( currentObj[el] === undefined ) {
+                let summary = JSON.stringify(currentObj).substr(0,5000);
+                if ( throwError ) {
+                    throw new Error("ParserPCAP:ensurePathExists : path not found : " + jsonPath + " at " + el + " : " + summary);
+                }
+                else {
+                    return false;
+                }
+            }
+
+            currentObj = currentObj[el];
+        }
+
+        return true;
+    }
 }
