@@ -144,7 +144,13 @@ export class ParserPCAP {
                             }
                         }
                         else {
-                            this.exit("ParserPCAP: trace doesn't start with the first initial, not yet supported. Abandoning", packetInfo.packetType, packetInfo.header );
+                            // this.exit("ParserPCAP: trace doesn't start with the first initial, not yet supported. Abandoning", packetInfo.packetType, packetInfo.header, this.CIDToODCIDMap );
+                            
+                            if ( this.debugging ) {
+                                console.log("ParserPCAP: trace doesn't start with the first initial, not yet supported. Dropping packet.", packetInfo.packetType, packetInfo.header, this.CIDToODCIDMap );
+                            }
+
+                            continue;
                         }
                     }
 
@@ -375,7 +381,15 @@ export class ParserPCAP {
                 IPdstField = "ipv6.dst";
             }
 
-            const UDP = rawEntry._source.layers.udp;
+            let UDP = rawEntry._source.layers.udp;
+
+            if ( !UDP ) {
+                // sometimes, the UDP stuff is inside an ICMP object (don't ask me why... I don't know)
+                UDP = rawEntry._source.layers.icmp.udp;
+                if ( !UDP ) {
+                    this.exit("ParserPCAP:IPtoCID: no UDP layer found for this QUIC packet, shouldn't happen!", rawEntry);
+                }
+            }
 
             let output = "zerolengthCID:";
 
@@ -1106,6 +1120,10 @@ export class ParserPCAP {
         public getConnectionInfo(firstEntry:any, firstPacketHeader:qlog.IPacketHeader) {
             let layer_ip = firstEntry['_source']['layers']['ip'];
             let layer_udp = firstEntry['_source']['layers']['udp'];
+
+            if ( !layer_udp ) {
+                console.log("Trying to find UDP stuff, but doesn't exist... wth: ", firstEntry);
+            }
 
             if(!layer_ip) {
                 layer_ip = firstEntry['_source']['layers']['ipv6'];
