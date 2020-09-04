@@ -36,16 +36,17 @@ export class ParserPCAP {
         protected jsonRoot:any = undefined;
         protected originalFileURI:string = "";
         protected debugging:boolean = false;
+        protected logUnknownFramesFields:boolean = false;
 
         private static DEFAULT_SCID = "zerolength:scid";
         private static DEFAULT_DCID = "zerolength:dcid";
 
-        public static Parse(jsonContents:any, originalFile: string, logRawPayloads: boolean, secretsContents:any):qlog.IQLog {
+        public static Parse(jsonContents:any, originalFile: string, logRawPayloads: boolean, secretsContents:any, logUnknownFramesFields: boolean = false):qlog.IQLog {
             
             let debugging:boolean = process.env.PCAPDEBUG !== undefined; // run: sudo PCAPDEBUG=true node out/main.js ...   (TODO: make this proper, app-wide instead of checking env directly here, which is dirty)
 
             try {
-                let pcapParser = new ParserPCAP( jsonContents, originalFile, debugging );
+                let pcapParser = new ParserPCAP( jsonContents, originalFile, debugging, logUnknownFramesFields );
 
                 return pcapParser.parse();
             }
@@ -58,10 +59,11 @@ export class ParserPCAP {
             }
         }
 
-        constructor(private jsonTrace: any, originalFile: string, debugging: boolean = false) {
+        constructor(private jsonTrace: any, originalFile: string, debugging: boolean = false, logUnknownFramesFields: boolean = false) {
             this.debugging = debugging;
             this.jsonRoot = jsonTrace;
             this.originalFileURI = originalFile;
+            this.logUnknownFramesFields = logUnknownFramesFields
         }
 
 
@@ -811,10 +813,14 @@ export class ParserPCAP {
                         if( this.debugging ) {
                             console.log("Unknown frame type found ", rawFrame["quic.frame_type"], rawFrame );
                         }
-                        return {
+                        let frame: IUnknownFrame = {
                             frame_type: QUICFrameTypeName.unknown_frame_type,
                             raw_frame_type: rawFrame["quic.frame_type"],
-                        } as IUnknownFrame;
+                        }
+                        if (this.logUnknownFramesFields) {
+                            (frame as any).raw_frame_content = rawFrame;
+                        }
+                        return frame;
                     }
             }
         }
