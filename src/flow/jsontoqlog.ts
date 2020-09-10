@@ -10,7 +10,7 @@ const writeFileAsync = promisify(fs.writeFile);
 
 export class JSONToQLog{
 
-    public static async TransformToQLog(jsonPath:string, outputDirectory:string,  originalFile: string, logRawPayloads: boolean, secretsPath?:string, logUnknownFramesFields: boolean = false):Promise<qlog.IQLog> {
+    public static async TransformToQLog(jsonPath:string, outputDirectory:string,  originalFile: string, logRawPayloads: boolean, timeUnit: "ms" | "us", secretsPath?:string, logUnknownFramesFields: boolean = false):Promise<qlog.IQLog> {
 
         // assumptions:
         // - jsonPath and secretsPath are LOCAL (if it was a URL, it has to be pre-downloaded)
@@ -30,7 +30,7 @@ export class JSONToQLog{
 
         // TODO: properly deal with different versions of QUIC and address the correct parser
         // see how we did this in @quictools/qlog-schema and replicate something similar here
-        let qlog:qlog.IQLog = ParserPCAP.Parse( jsonContents, originalFile, logRawPayloads, secretsContents, logUnknownFramesFields );
+        let qlog:qlog.IQLog = ParserPCAP.Parse( jsonContents, originalFile, logRawPayloads, timeUnit, secretsContents, logUnknownFramesFields );
 
         // we could write this to file directly now
         // BUT we want to aggregate possible different IQLogs together in 1 combined/grouped IQLog before writing the final output

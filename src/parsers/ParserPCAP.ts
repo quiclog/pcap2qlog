@@ -22,13 +22,18 @@ interface TraceWrapper {
     selectedALPN: string|undefined
 }
 
+const ONE_SECOND_IN = {
+    "ms": 1e3,
+    "us": 1e6,
+}
+
 export class ParserPCAP {
         public clientCID: string|undefined = ParserPCAP.DEFAULT_SCID;
         public clientPermittedCIDs: Set<string> = new Set<string>(); // New connection ids the client is permitted to use, communicated using NEW_CONNECTION_ID frames from server to client
         public serverCID: string|undefined = ParserPCAP.DEFAULT_SCID;
         public serverPermittedCIDs: Set<string> = new Set<string>(); // New connection ids the server is permitted to use, communicated using NEW_CONNECTION_ID frames from client to server
         public ODCID: string|undefined = "ODCID_DEFAULT"; // Original destination conn id
-        public serverCIDChanged: boolean = false;; // Flip after initial change
+        public serverCIDChanged: boolean = false; // Flip after initial change
 
         protected traceMap:Map<string, TraceWrapper> = new Map<string, TraceWrapper>(); // maps ODCIDs to a trace
         protected CIDToODCIDMap:Map<string, string> = new Map<string, string>(); // maps actual CIDs to an ODCID (to be used to lookup the trace)
@@ -37,16 +42,17 @@ export class ParserPCAP {
         protected originalFileURI:string = "";
         protected debugging:boolean = false;
         protected logUnknownFramesFields:boolean = false;
+        protected timeUnit: "ms" | "us" = "ms";
 
         private static DEFAULT_SCID = "zerolength:scid";
         private static DEFAULT_DCID = "zerolength:dcid";
 
-        public static Parse(jsonContents:any, originalFile: string, logRawPayloads: boolean, secretsContents:any, logUnknownFramesFields: boolean = false):qlog.IQLog {
+        public static Parse(jsonContents:any, originalFile: string, logRawPayloads: boolean, timeUnit: "ms" | "us", secretsContents:any, logUnknownFramesFields: boolean = false):qlog.IQLog {
             
             let debugging:boolean = process.env.PCAPDEBUG !== undefined; // run: sudo PCAPDEBUG=true node out/main.js ...   (TODO: make this proper, app-wide instead of checking env directly here, which is dirty)
 
             try {
-                let pcapParser = new ParserPCAP( jsonContents, originalFile, debugging, logUnknownFramesFields );
+                let pcapParser = new ParserPCAP( jsonContents, originalFile, timeUnit, debugging, logUnknownFramesFields );
 
                 return pcapParser.parse();
             }
@@ -59,11 +65,12 @@ export class ParserPCAP {
             }
         }
 
-        constructor(private jsonTrace: any, originalFile: string, debugging: boolean = false, logUnknownFramesFields: boolean = false) {
+        constructor(private jsonTrace: any, originalFile: string, timeUnit: "ms" | "us", debugging: boolean = false, logUnknownFramesFields: boolean = false) {
             this.debugging = debugging;
             this.jsonRoot = jsonTrace;
             this.originalFileURI = originalFile;
-            this.logUnknownFramesFields = logUnknownFramesFields
+            this.logUnknownFramesFields = logUnknownFramesFields;
+            this.timeUnit = timeUnit;
         }
 
 
@@ -191,7 +198,7 @@ export class ParserPCAP {
 
                     const rawFrame = rawEntry["_source"]["layers"]["frame"];
                     const time = this.getTime( rawFrame );
-                    trace!.currentTime = Math.round( (time - trace!.referenceTime) * 1000 ); // relative to the trace's first timestamp. Time is in nanoseconds
+                    trace!.currentTime = Math.round( (time - trace!.referenceTime) * ONE_SECOND_IN[this.timeUnit] ); // relative to the trace's first timestamp.
 
                     // 2.3
                     this.checkVersionUpdate( trace!, parsedHeader );
@@ -295,7 +302,7 @@ export class ParserPCAP {
                 },
                 configuration: {
                     time_offset: "0",
-                    time_units: "ms",
+                    time_units: this.timeUnit,
                     original_uris: [ this.originalFileURI ],
                 },
                 common_fields: {

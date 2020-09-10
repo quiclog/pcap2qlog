@@ -47,6 +47,13 @@ let output_path: string          = args.p || args.outputpath;   // output will b
 let tsharkLocation: string       = args.t || args.tshark || "/wireshark/run/tshark"; // Path to the TShark executable
 let logRawPayloads: boolean      = args.r || args.raw || false; // If set to false, raw decrypted payloads will not be logged. This is default behaviour as payloads have a huge impact on log size.
 let logUnkFramesFields: boolean  = args.u || args.logunknownframesfields || false; // if set to true, adds to the qlog file the fields of the unknown frames present in the pcap parsed by TShark
+let unchecked_time_unit: string  = args.T || args.timeunit || "ms"; // default: "ms". Defines the time unit in which to encode the timestamp in the resulting qlog file. Can be aither "ms" (milliseconds) or "us" (microseconds).
+
+if (unchecked_time_unit != "ms" && unchecked_time_unit != "us") {
+    console.error("Invalid time unit. The time unit should be either ms or us. Received value: " + unchecked_time_unit);
+    process.exit(1);
+}
+let time_unit: "ms" | "us" = unchecked_time_unit;
 
 if( !input_file && !input_list ){
     console.error("No input file or list of files specified, use --input or --list");
@@ -218,7 +225,7 @@ async function Flow() {
 
         try{
             // we don't write to file here, but pass the qlog object around directly to write a combined file later
-            capt.qlog = await JSONToQLog.TransformToQLog( capt.capture, tempDirectory, capt.capture_original, logRawPayloads, capt.secrets, logUnkFramesFields );
+            capt.qlog = await JSONToQLog.TransformToQLog( capt.capture, tempDirectory, capt.capture_original, logRawPayloads, time_unit, capt.secrets, logUnkFramesFields );
         }
         catch(e){
             // console.error("ERROR transforming", e);
