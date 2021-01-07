@@ -460,7 +460,7 @@ export class ParserPCAP {
                 }
 
                 // server issued this CID, so the client can use it to contact the server
-                if ( trace.serverIssuedCIDs.indexOf(header.dcid!) ) { // if undefined, it's just not initialized yet: skip
+                if ( trace.serverIssuedCIDs.includes(header.dcid!) ) { // if undefined, it's just not initialized yet: skip
 
                     this.addEvent(trace, [ // Log the change of cid
                         "" + trace.currentTime,
@@ -475,7 +475,7 @@ export class ParserPCAP {
                     trace.currentServerCID = header.dcid; 
                 }
 
-                else if ( trace.clientIssuedCIDs.indexOf(header.dcid!) ) {
+                else if ( trace.clientIssuedCIDs.includes(header.dcid!) ) {
 
                     this.addEvent(trace, [ // Log the change of cid
                         "" + trace.currentTime,
