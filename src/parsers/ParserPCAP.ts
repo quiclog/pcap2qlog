@@ -915,7 +915,7 @@ export class ParserPCAP {
                 stream_id: tsharkStreamFrame["quic.stream.stream_id"],
 
                 offset: tsharkStreamFrame['quic.frame_type_tree']['quic.stream.off'] === "1" ? tsharkStreamFrame["quic.stream.offset"] : "0",
-                length: tsharkStreamFrame["quic.stream.length"],
+                length: ((tsharkStreamFrame["quic.stream_data"].length + 1) / 3).toString(), // Data is hex encoded like 00:00:00:00
 
                 fin: tsharkStreamFrame["quic.frame_type_tree"]["quic.stream.fin"] === "1",
                 // raw: logRawPayloads ? tsharkStreamFrame["quic.stream_data"].replace(/:/g, '') : undefined,
