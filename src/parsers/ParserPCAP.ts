@@ -135,7 +135,7 @@ export class ParserPCAP {
 
                             let foundCryptoFrame = undefined;
                             for ( const rawFrame of rawFrames ) {
-                                if ( PCAPUtil.ensurePathExists("tls.handshake/tls.handshake.type", rawFrame, false ) ) {
+                                if ( PCAPUtil.ensurePathExists("tls/tls.handshake/tls.handshake.type", rawFrame, false ) ) {
                                     foundCryptoFrame = rawFrame;
                                     break;
                                 }
@@ -145,7 +145,7 @@ export class ParserPCAP {
                                 this.exit("ParserPCAP: no tls info known for the first QUIC initial, not supported! Are you sure the trace decrypted?", rawPacket, rawPacket["quic.frame"] );
                             }
                             else {
-                                if ( foundCryptoFrame["tls.handshake"]["tls.handshake.type"] !== "1" ){ // 1 === ClientHello. 2 === ServerHello
+                                if ( foundCryptoFrame["tls"]["tls.handshake"]["tls.handshake.type"] !== "1" ){ // 1 === ClientHello. 2 === ServerHello
                                     this.exit("ParserPCAP: first QUIC initial in this trace is ServerHello. Pcap2qlog needs the ClientHello to work properly.", rawPackets);
                                 }
                                 else {
